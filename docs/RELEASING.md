@@ -29,8 +29,16 @@ GitHub Actions에서 **npm Release → Run workflow → main**을 선택하고 `
 2. 최신 `main`에 해당 버전의 태그를 생성합니다. 예를 들어 버전이 `0.1.0`이면 태그는 `v0.1.0`이어야 합니다.
 3. 태그를 push하면 검증과 npm 배포가 실행됩니다.
 4. 안정 버전은 `latest`, 사전 버전은 `next` dist-tag로 배포합니다.
-5. 워크플로 결과와 npm에 등록된 버전·provenance를 확인합니다.
+5. 워크플로 결과와 npm에 등록된 버전·provenance를 확인합니다. `npm view @ohah/heic@<버전> version`과 새 디렉터리의 설치·디코딩 검증까지 통과해야 공개 완료로 판단합니다.
 
 태그 버전과 `package.json` 버전이 다르거나 태그의 커밋이 `main`에 포함되지 않으면 실패합니다. 수동 실행에서도 `dry_run: false`를 선택하면 실제 배포하므로 사전 검증과 구분합니다. 이미 배포한 버전은 다시 배포하지 않습니다.
 
 이 설정 작업 자체는 첫 npm 버전을 배포하지 않습니다. 지원 범위와 미지원 기능은 README와 검증 기록을 확인합니다.
+
+## 제출 성공과 실제 공개 구분
+
+npm은 제출 직후 패키지를 검사해 설치 가능 시점이 늦어질 수 있습니다. CLI의 성공 메시지만으로 설치까지 완료됐다고 보고하지 않습니다. 메타데이터와 tarball 다운로드 가능 여부를 각각 확인하고, 대기 중 같은 버전을 중복 제출하지 않습니다.
+
+`0.0.0-stage` 임시 버전 표시만으로 사용자 승인 대기를 단정하지 않습니다. 실제 Staged Packages 목록이 있는지 확인해야 합니다. `0.1.0` 첫 배포에서는 사용자 승인 없이 잠시 뒤 정상 버전과 tarball이 공개됐습니다.
+
+공식 안내: https://github.blog/changelog/2026-07-28-npm-publish-time-malware-scanning-and-dual-use-metadata/
