@@ -2,11 +2,19 @@
 
 Pure TypeScript HEIC/HEIF still-image decoding. MIT. No WebAssembly, native modules, runtime dependencies, libheif, or libde265.
 
-**Early implementation, not a drop-in replacement for every HEIC decoder.** Based on the MIT-licensed [ts-heic](https://github.com/stacksjs/ts-heic) implementation; see [NOTICE](NOTICE). This project adds 8/10/12-bit monochrome, 4:2:0 and 4:4:4 reconstruction, auxiliary alpha, HDR reconstruction, resource limits, and a browser worker API. It is not published to npm yet.
+**Early implementation, not a drop-in replacement for every HEIC decoder.** Based on the MIT-licensed [ts-heic](https://github.com/stacksjs/ts-heic) implementation; see [NOTICE](NOTICE). This project adds 8/10/12-bit monochrome, 4:2:0 and 4:4:4 reconstruction, auxiliary alpha, HDR reconstruction, resource limits, and a browser worker API. Published as [`@ohah/heic`](https://www.npmjs.com/package/@ohah/heic).
 
 ## Usage
 
-Build with `bun install --ignore-scripts && bun run build`.
+Install the released package:
+
+```sh
+npm install @ohah/heic
+# or: pnpm add @ohah/heic
+# or: bun add @ohah/heic
+```
+
+To build from source, run `bun install --ignore-scripts && bun run build`.
 
 ```ts
 import { decode, decodeHeic } from '@ohah/heic';
@@ -298,6 +306,8 @@ GitHub Actions uses `.github/workflows/release.yml` and the `npm` deployment env
 - A manual run with `dry_run: false` also publishes the selected main/tag version. npm versions are immutable; do not republish an existing version.
 
 See [the Korean maintainer release guide](docs/RELEASING.md) for setup and checks. The npm token must be permitted to publish `@ohah/heic`; authentication and dry-run success alone do not prove write permission for the first real publish.
+
+The registry can scan a newly submitted version before exposing its tarball. A successful publish command alone is not an installation check. After publication, verify the exact version with `npm view @ohah/heic@<version> version` and a fresh install. A temporary `0.0.0-stage` placeholder alone does not establish that the maintainer must approve a staged package; check the actual staging queue before requesting approval.
 
 ## License
 

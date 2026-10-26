@@ -146,5 +146,5 @@ jobs:
             echo '### 사전 검증 완료: npm에 실제 배포하지 않았습니다.' >> "$GITHUB_STEP_SUMMARY"
           else
             npm publish "${packages[0]}" --access public --provenance --tag "$DIST_TAG" --ignore-scripts
-            echo '### npm 배포 완료' >> "$GITHUB_STEP_SUMMARY"
+            echo '### npm 제출 완료: 레지스트리 공개와 새 설치 결과를 별도로 확인하세요.' >> "$GITHUB_STEP_SUMMARY"
           fi
