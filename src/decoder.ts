@@ -1,23 +1,19 @@
-import { decodeItemPlanes, cropPlanes, stitchGrid } from "./planes.js";
-import type { Planes } from "./planes.js";
-import { decodeRendered } from "./render.js";
-import { HeicError, asHeicError } from "./errors.js";
+import { decodeItemPlanes, cropPlanes, stitchGrid } from './planes.js';
+import type { Planes } from './planes.js';
+import { decodeRendered } from './render.js';
+import { HeicError, asHeicError } from './errors.js';
 /**
  * Public HEIC decoding API: container walk, HEVC intra decode of every tile,
  * grid stitching, conformance-window crop, YCbCr to RGBA conversion, and the
  * irot/imir display transforms.
  */
-import type { GridInfo, HeicInfo } from "./container/heic.js";
-import type { SpsInfo } from "./hevc/sps.js";
-import { applyOrientation, yuv420ToRgba } from "./color.js";
-import { getHeicInfo, getItemPayload } from "./container/heic.js";
-import { getFtypInfo, parseISOBMFF, findBox, parseIinf } from "./container/heif.js";
-import { deblockPicture } from "./hevc/deblock.js";
-import { isSliceNal, splitLengthPrefixed } from "./hevc/nal.js";
-import { PictureDecoder } from "./hevc/picture.js";
-import { parsePps } from "./hevc/pps.js";
-import { applySao } from "./hevc/sao.js";
-import { parseSps } from "./hevc/sps.js";
+import type { HeicInfo } from './container/heic.js';
+import type { SpsInfo } from './hevc/sps.js';
+import { applyOrientation, yuv420ToRgba } from './color.js';
+import { getHeicInfo, getItemPayload } from './container/heic.js';
+import { getFtypInfo, parseISOBMFF, findBox, parseIinf } from './container/heif.js';
+import { isSliceNal, splitLengthPrefixed } from './hevc/nal.js';
+import { parseSps } from './hevc/sps.js';
 
 export interface HeicMetadata extends HeicInfo {
   /** Parsed from the primary item's SPS; cross-checks the container. */
@@ -34,18 +30,18 @@ export function isHeic(buffer: Uint8Array): boolean {
   const brands = [ftyp.majorBrand, ...ftyp.compatibleBrands];
   if (
     brands.some((brand) =>
-      ["heic", "heix", "hevc", "hevx", "heim", "heis", "hevm", "hevs"].includes(brand),
+      ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'hevm', 'hevs'].includes(brand),
     )
   )
     return true;
   // Generic HEIF brands do not identify the codec. Inspect item declarations,
   // rather than interpreting AVIF/VVC containers as HEVC from their extension.
-  if (!brands.some((brand) => ["mif1", "mif2"].includes(brand))) return false;
+  if (!brands.some((brand) => ['mif1', 'mif2'].includes(brand))) return false;
   try {
     const boxes = parseISOBMFF(buffer);
-    const meta = findBox(boxes, "meta");
-    const iinf = meta?.children && findBox(meta.children, "iinf");
-    return !!iinf && parseIinf(iinf.data).some((item) => item.itemType === "hvc1");
+    const meta = findBox(boxes, 'meta');
+    const iinf = meta?.children && findBox(meta.children, 'iinf');
+    return !!iinf && parseIinf(iinf.data).some((item) => item.itemType === 'hvc1');
   } catch {
     return false;
   }
@@ -56,7 +52,7 @@ export function isHeic(buffer: Uint8Array): boolean {
  * grid layout, rotation/mirror, bit depth, and the HEVC parameter sets.
  */
 export function getHeicMetadata(buffer: Uint8Array): HeicMetadata {
-  if (!isHeic(buffer)) throw new Error("heic: not a HEIC file (ftyp brand mismatch)");
+  if (!isHeic(buffer)) throw new Error('heic: not a HEIC file (ftyp brand mismatch)');
 
   const boxes = parseISOBMFF(buffer);
   const info = getHeicInfo(buffer, boxes);
@@ -100,26 +96,26 @@ export interface DecodeOptions {
 /** Decode a HEIC file to RGBA pixels. */
 function decodeInternal(buffer: Uint8Array, options: DecodeOptions): HeicImageData {
   if (!(buffer instanceof Uint8Array))
-    throw new HeicError("INVALID_INPUT", "heic: expected Uint8Array");
+    throw new HeicError('INVALID_INPUT', 'heic: expected Uint8Array');
   if (buffer.byteLength > 64 * 1024 * 1024)
-    throw new HeicError("RESOURCE_LIMIT", "heic: input exceeds 64 MiB");
-  if (!isHeic(buffer)) throw new HeicError("UNSUPPORTED_FORMAT", "heic: not a HEIC file");
+    throw new HeicError('RESOURCE_LIMIT', 'heic: input exceeds 64 MiB');
+  if (!isHeic(buffer)) throw new HeicError('UNSUPPORTED_FORMAT', 'heic: not a HEIC file');
   const maxPixels = options.maxPixels ?? 50_000_000;
   if (!Number.isSafeInteger(maxPixels) || maxPixels <= 0 || maxPixels > 50_000_000)
-    throw new HeicError("INVALID_OPTIONS", "heic: invalid maxPixels");
+    throw new HeicError('INVALID_OPTIONS', 'heic: invalid maxPixels');
   const boxes = parseISOBMFF(buffer);
   const info = getHeicInfo(buffer, boxes);
   if (
-    info.transforms.some((transform) => transform.type === "clap") ||
+    info.transforms.some((transform) => transform.type === 'clap') ||
     info.hasAlpha ||
-    ["iovl", "iden", "tmap"].includes(info.primaryItemType)
+    ['iovl', 'iden', 'tmap'].includes(info.primaryItemType)
   )
     return decodeRendered(buffer, options);
   if (!info.hvcC)
-    throw new HeicError("INVALID_CONTAINER", "heic: primary item has no HEVC configuration (hvcC)");
+    throw new HeicError('INVALID_CONTAINER', 'heic: primary item has no HEVC configuration (hvcC)');
 
   if (info.hasAlpha)
-    throw new HeicError("UNSUPPORTED_FEATURE", "heic: auxiliary alpha planes are not supported");
+    throw new HeicError('UNSUPPORTED_FEATURE', 'heic: auxiliary alpha planes are not supported');
   const sps = parseSps(info.hvcC.sps[0]);
   if (sps.chromaFormatIdc !== 1) return decodeRendered(buffer, options);
   const matrix =
@@ -127,13 +123,13 @@ function decodeInternal(buffer: Uint8Array, options: DecodeOptions): HeicImageDa
       ? info.color.matrix
       : (sps.color?.matrixCoeffs ?? 6);
   if (![1, 2, 5, 6, 9].includes(matrix))
-    throw new HeicError("UNSUPPORTED_FEATURE", "heic: color matrix is not supported");
+    throw new HeicError('UNSUPPORTED_FEATURE', 'heic: color matrix is not supported');
 
   const pixels = info.grid
     ? info.grid.rows * info.grid.tileHeight * info.grid.columns * info.grid.tileWidth
     : sps.picWidthInLumaSamples * sps.picHeightInLumaSamples;
   if (!Number.isSafeInteger(pixels) || pixels <= 0 || pixels > maxPixels)
-    throw new HeicError("RESOURCE_LIMIT", "heic: image exceeds maxPixels");
+    throw new HeicError('RESOURCE_LIMIT', 'heic: image exceeds maxPixels');
   let planes: Planes;
   if (info.grid) {
     planes = stitchGrid(buffer, boxes, info, info.grid);

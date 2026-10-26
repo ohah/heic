@@ -1,14 +1,14 @@
 // External fixture bytes remain outside the repository and npm package.
-import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { createHash } from "node:crypto";
-import { join } from "node:path";
-import { decodeHeic, getHeicMetadata, decodeHDRSync } from "../src";
-import { parseISOBMFF, findBox, parseIinf } from "../src/container/heif";
-import { getHeicInfo, parsePitm } from "../src/container/heic";
-const output = process.env.HEIC_CORPUS_DIR ?? "/tmp/heic-external-corpus";
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { join } from 'node:path';
+import { decodeHeic, getHeicMetadata, decodeHDRSync } from '../src';
+import { parseISOBMFF, findBox, parseIinf } from '../src/container/heif';
+import { parsePitm } from '../src/container/heic';
+const output = process.env.HEIC_CORPUS_DIR ?? '/tmp/heic-external-corpus';
 await mkdir(output, { recursive: true });
 const manifest = JSON.parse(
-  await readFile(new URL("../test/corpus-manifest.json", import.meta.url), "utf8"),
+  await readFile(new URL('../test/corpus-manifest.json', import.meta.url), 'utf8'),
 );
 const results = [];
 for (const [index, item] of manifest.entries()) {
@@ -22,11 +22,11 @@ for (const [index, item] of manifest.entries()) {
     bytes = new Uint8Array(await response.arrayBuffer());
     await writeFile(path, bytes);
   }
-  if (createHash("sha256").update(bytes).digest("hex") !== item.sha256)
-    throw Error("Fixture checksum mismatch: " + item.name);
+  if (createHash('sha256').update(bytes).digest('hex') !== item.sha256)
+    throw Error('Fixture checksum mismatch: ' + item.name);
   const started = performance.now();
   let meta: any,
-    classification = "hevc-still";
+    classification = 'hevc-still';
   try {
     const m = getHeicMetadata(bytes);
     meta = {
@@ -41,22 +41,22 @@ for (const [index, item] of manifest.entries()) {
   } catch {
     try {
       const boxes = parseISOBMFF(bytes);
-      if (!findBox(boxes, "meta") && findBox(boxes, "moov")) classification = "timed-sequence";
+      if (!findBox(boxes, 'meta') && findBox(boxes, 'moov')) classification = 'timed-sequence';
       else {
-        const meta = findBox(boxes, "meta"),
-          iinf = meta?.children && findBox(meta.children, "iinf"),
-          pitm = meta?.children && findBox(meta.children, "pitm");
+        const metaBox = findBox(boxes, 'meta'),
+          iinf = metaBox?.children && findBox(metaBox.children, 'iinf'),
+          pitm = metaBox?.children && findBox(metaBox.children, 'pitm');
         const items = iinf ? parseIinf(iinf.data) : [],
-          primary = pitm ? items.find((item) => item.itemId === parsePitm(pitm.data)) : undefined;
-        if (primary && ["vvc1", "av01", "avc1", "jpeg", "j2k1"].includes(primary.itemType))
-          classification = "other-codec-" + primary.itemType;
+          primary = pitm ? items.find((entry) => entry.itemId === parsePitm(pitm.data)) : undefined;
+        if (primary && ['vvc1', 'av01', 'avc1', 'jpeg', 'j2k1'].includes(primary.itemType))
+          classification = 'other-codec-' + primary.itemType;
       }
     } catch {}
   }
   try {
     const image = decodeHeic(bytes);
     let invariant = true;
-    if (item.name.includes("__L_") || item.name.includes("__LA_"))
+    if (item.name.includes('__L_') || item.name.includes('__LA_'))
       for (let i = 0; i < image.data.length; i += 4)
         if (image.data[i] !== image.data[i + 1] || image.data[i] !== image.data[i + 2]) {
           invariant = false;
@@ -65,11 +65,11 @@ for (const [index, item] of manifest.entries()) {
     let hdr: any;
     // Real Apple gain maps and the explicit PQ/HLG/ISO samples get an HDR check.
     if (
-      meta?.type === "tmap" ||
-      item.name.includes("HEIC_HDR") ||
-      item.name.includes("coffee") ||
-      item.name.includes("mug") ||
-      item.name.includes("kahvihuone")
+      meta?.type === 'tmap' ||
+      item.name.includes('HEIC_HDR') ||
+      item.name.includes('coffee') ||
+      item.name.includes('mug') ||
+      item.name.includes('kahvihuone')
     ) {
       try {
         const d = decodeHDRSync(bytes);
@@ -80,7 +80,7 @@ for (const [index, item] of manifest.entries()) {
           if (i % 4 !== 3) peak = Math.max(peak, d.data[i]);
         }
         hdr = {
-          status: "decoded",
+          status: 'decoded',
           source: d.source,
           headroom: d.headroom,
           sourceHeadroom: d.sourceHeadroom,
@@ -88,14 +88,14 @@ for (const [index, item] of manifest.entries()) {
           finite,
         };
       } catch (error: any) {
-        hdr = { status: "rejected", code: error.code, error: error.message };
+        hdr = { status: 'rejected', code: error.code, error: error.message };
       }
     }
     results.push({
       ...item,
       classification,
       meta,
-      status: invariant ? "decoded" : "invariant-failed",
+      status: invariant ? 'decoded' : 'invariant-failed',
       width: image.width,
       height: image.height,
       bitDepth: image.bitDepth,
@@ -108,16 +108,16 @@ for (const [index, item] of manifest.entries()) {
       ...item,
       classification,
       meta,
-      status: "rejected",
+      status: 'rejected',
       code: error.code,
       error: error.message,
       ms: performance.now() - started,
     });
   }
   console.log(JSON.stringify({ index: index + 1, ...results.at(-1) }));
-  await writeFile(join(output, "results.partial.json"), JSON.stringify(results, null, 2));
+  await writeFile(join(output, 'results.partial.json'), JSON.stringify(results, null, 2));
 }
-await writeFile(join(output, "results.json"), JSON.stringify(results, null, 2));
-console.log("All external fixtures attempted:", results.length);
+await writeFile(join(output, 'results.json'), JSON.stringify(results, null, 2));
+console.log('All external fixtures attempted:', results.length);
 // Rejections are retained, not converted to passing expectations after the fact.
-if (results.some((row) => row.status === "invariant-failed")) process.exitCode = 1;
+if (results.some((row) => row.status === 'invariant-failed')) process.exitCode = 1;

@@ -1,4 +1,4 @@
-import { HeicError } from "../errors.js";
+import { HeicError } from '../errors.js';
 /**
  * The HEVC intra picture decoder: CTU wavefront loop, coding quadtree,
  * intra CU/PU/TU parsing, residual coding, and reconstruction into YUV
@@ -8,15 +8,15 @@ import { HeicError } from "../errors.js";
  * WPP (entropy_coding_sync), cu_qp_delta, and scaling lists are supported
  * because iPhone captures enable all three.
  */
-import type { PpsInfo } from "./pps.js";
-import type { SliceHeader } from "./slice-header.js";
-import type { SpsInfo } from "./sps.js";
-import { CabacContexts, CabacDecoder, CTX } from "./cabac.js";
-import { filterRefs, gatherRefs, predictIntra } from "./intra.js";
-import { buildScalingFactors } from "./scaling.js";
-import { getScan, SCAN_DIAG } from "./scan.js";
-import { parseSliceHeader, SLICE_TYPE_I } from "./slice-header.js";
-import { dequantize, inverseTransform } from "./transform.js";
+import type { PpsInfo } from './pps.js';
+import type { SliceHeader } from './slice-header.js';
+import type { SpsInfo } from './sps.js';
+import { CabacContexts, CabacDecoder, CTX } from './cabac.js';
+import { filterRefs, gatherRefs, predictIntra } from './intra.js';
+import { buildScalingFactors } from './scaling.js';
+import { getScan, SCAN_DIAG } from './scan.js';
+import { parseSliceHeader, SLICE_TYPE_I } from './slice-header.js';
+import { dequantize, inverseTransform } from './transform.js';
 
 const CTX_IDX_MAP_4X4 = [0, 1, 4, 5, 2, 3, 4, 5, 6, 6, 8, 8, 7, 7, 8, 8];
 
@@ -129,21 +129,21 @@ export class PictureDecoder {
       (sps.chromaFormatIdc !== 0 && sps.bitDepthChroma !== sps.bitDepthLuma)
     )
       throw new HeicError(
-        "UNSUPPORTED_FEATURE",
-        "heic: only monochrome/4:2:0/4:4:4 HEVC with matching 8/10/12-bit planes is supported",
+        'UNSUPPORTED_FEATURE',
+        'heic: only monochrome/4:2:0/4:4:4 HEVC with matching 8/10/12-bit planes is supported',
       );
     if (sps.separateColourPlane || sps.rangeFlags & ~8)
       throw new HeicError(
-        "UNSUPPORTED_FEATURE",
-        "heic: unsupported separate-plane or range-extension tools " + sps.rangeFlags,
+        'UNSUPPORTED_FEATURE',
+        'heic: unsupported separate-plane or range-extension tools ' + sps.rangeFlags,
       );
     if (pps.tilesEnabled)
       throw new HeicError(
-        "UNSUPPORTED_FEATURE",
-        "heic: HEVC tile coding is not supported (HEIF image grids are supported)",
+        'UNSUPPORTED_FEATURE',
+        'heic: HEVC tile coding is not supported (HEIF image grids are supported)',
       );
     if (sps.pcmEnabled)
-      throw new HeicError("UNSUPPORTED_FEATURE", "heic: PCM coding is not supported");
+      throw new HeicError('UNSUPPORTED_FEATURE', 'heic: PCM coding is not supported');
 
     this.bd = sps.bitDepthLuma;
     this.w = sps.picWidthInLumaSamples;
@@ -156,14 +156,14 @@ export class PictureDecoder {
       this.w % 8 ||
       this.h % 8
     )
-      throw new RangeError("heic: coded dimensions exceed limits or are not aligned to 8 pixels");
+      throw new RangeError('heic: coded dimensions exceed limits or are not aligned to 8 pixels');
     if (
       sps.log2CtbSize < 4 ||
       sps.log2CtbSize > 6 ||
       sps.log2MinTransformBlockSize < 2 ||
       sps.log2MaxTransformBlockSize > 5
     )
-      throw new HeicError("UNSUPPORTED_FEATURE", "heic: unsupported block sizes");
+      throw new HeicError('UNSUPPORTED_FEATURE', 'heic: unsupported block sizes');
     this.cw = sps.chromaFormatIdc === 3 ? this.w : sps.chromaFormatIdc ? this.w >> 1 : 0;
     this.ch = sps.chromaFormatIdc === 3 ? this.h : sps.chromaFormatIdc ? this.h >> 1 : 0;
     this.log2Ctb = sps.log2CtbSize;
@@ -210,13 +210,13 @@ export class PictureDecoder {
   /** Decode all slice NALs of one coded picture. */
   decode(sliceNals: Uint8Array[]): DecodedPicture {
     if (sliceNals.length !== 1)
-      throw new HeicError("UNSUPPORTED_FEATURE", "heic: multi-slice pictures are not supported");
+      throw new HeicError('UNSUPPORTED_FEATURE', 'heic: multi-slice pictures are not supported');
     for (const nal of sliceNals) {
       const sh = parseSliceHeader(nal, this.sps, this.pps);
       if (sh.sliceType !== SLICE_TYPE_I)
-        throw new HeicError("UNSUPPORTED_FEATURE", "heic: non-intra slice in still image");
+        throw new HeicError('UNSUPPORTED_FEATURE', 'heic: non-intra slice in still image');
       if (sh.dependentSliceSegment || sh.segmentAddress !== 0)
-        throw new HeicError("INVALID_BITSTREAM", "heic: incomplete picture slice");
+        throw new HeicError('INVALID_BITSTREAM', 'heic: incomplete picture slice');
       this.decodeSlice(sh);
     }
     return {
@@ -267,18 +267,18 @@ export class PictureDecoder {
       if (ctbAddr === totalCtbs - 1) {
         if (end !== 1)
           throw new HeicError(
-            "INVALID_BITSTREAM",
+            'INVALID_BITSTREAM',
             `heic: CABAC desync — end_of_slice_segment_flag not set at the last CTU (${this.ctbX},${this.ctbY})`,
           );
       } else if (end === 1) {
         throw new HeicError(
-          "INVALID_BITSTREAM",
-          "heic: slice ended before the complete picture was decoded",
+          'INVALID_BITSTREAM',
+          'heic: slice ended before the complete picture was decoded',
         );
       } else if (this.pps.entropyCodingSyncEnabled && this.ctbX === this.widthInCtbs - 1) {
         if (this.cabac.decodeTerminate() !== 1)
           throw new HeicError(
-            "INVALID_BITSTREAM",
+            'INVALID_BITSTREAM',
             `heic: CABAC desync — end_of_subset_one_bit missing at row ${this.ctbY}`,
           );
       }
@@ -666,7 +666,7 @@ export class PictureDecoder {
 
     // cbf_luma: always signalled for intra CUs at the leaves.
     const cbfLuma = this.cabac.decodeBin(CTX.CBF_LUMA + (trafoDepth === 0 ? 1 : 0)) === 1;
-    this.transformUnit(x0, y0, xBase, yBase, log2Size, blkIdx, cbfLuma, cbfCb, cbfCr, puModes);
+    this.transformUnit(x0, y0, xBase, yBase, log2Size, blkIdx, cbfLuma, cbfCb, cbfCr);
   }
 
   // --------------------------------------------------------- transform unit
@@ -681,7 +681,6 @@ export class PictureDecoder {
     cbfLuma: boolean,
     cbfCb: boolean,
     cbfCr: boolean,
-    puModes: number[],
   ): void {
     // cbfChroma refers to the PARENT node's chroma cbfs for 4x4 TUs at any
     // blkIdx (7.3.8.10) — the qp delta can be coded at blkIdx 0 even though

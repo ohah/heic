@@ -8,144 +8,144 @@ All 136 files in `test/corpus-manifest.json` were attempted, with source URL, by
 
 Sources: Nokia HEIF gallery/conformance, the original Nokia HEIF conformance repository, and pillow-heif tests. Source commits are pinned in the manifest. All 20 pillow-heif monochrome/RGB/alpha 8/10/12-bit fixtures, including 29×100 images, decoded.
 
-| File | Result | Detail |
-| --- | --- | --- |
-| nokia-content__cc0__3A_HEIC_HDR.heic | decoded | 8256×5504, 10-bit |
-| nokia-content__cc0__3B_HEIC_SDR.heic | decoded | 8256×5504, 10-bit |
-| nokia-content__conformance__C001.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C002.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C003.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C004.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C005.heic | decoded | 128×72, 8-bit |
-| nokia-content__conformance__C006.heic | rejected | hevc-still: heic: item 1005 carries no coded slices |
-| nokia-content__conformance__C007.heic | decoded | 2560×1440, 8-bit |
-| nokia-content__conformance__C008.heic | decoded | 720×1280, 8-bit |
-| nokia-content__conformance__C009.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C010.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C011.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C012.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C013.heic | decoded | 300×300, 8-bit |
-| nokia-content__conformance__C014.heic | decoded | 300×300, 8-bit |
-| nokia-content__conformance__C015.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C016.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C017.heic | decoded | 640×360, 8-bit |
-| nokia-content__conformance__C018.heic | decoded | 640×360, 8-bit |
-| nokia-content__conformance__C019.heic | decoded | 640×360, 8-bit |
-| nokia-content__conformance__C020.heic | decoded | 640×360, 8-bit |
-| nokia-content__conformance__C021.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C022.heic | decoded | 1440×960, 8-bit |
-| nokia-content__conformance__C023.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C024.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C025.heic | decoded | 128×72, 8-bit |
-| nokia-content__conformance__C026.heic | rejected | timed-sequence: heic: timed image sequences are not supported |
-| nokia-content__conformance__C027.heic | rejected | timed-sequence: heic: timed image sequences are not supported |
-| nokia-content__conformance__C028.heic | rejected | timed-sequence: heic: timed image sequences are not supported |
-| nokia-content__conformance__C029.heic | rejected | timed-sequence: heic: timed image sequences are not supported |
-| nokia-content__conformance__C030.heic | rejected | timed-sequence: heic: timed image sequences are not supported |
-| nokia-content__conformance__C031.heic | rejected | timed-sequence: heic: timed image sequences are not supported |
-| nokia-content__conformance__C032.heic | rejected | timed-sequence: heic: timed image sequences are not supported |
-| nokia-content__conformance__C034.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C036.heic | rejected | timed-sequence: heic: timed image sequences are not supported |
-| nokia-content__conformance__C037.heic | rejected | timed-sequence: heic: timed image sequences are not supported |
-| nokia-content__conformance__C038.heic | rejected | timed-sequence: heic: timed image sequences are not supported |
-| nokia-content__conformance__C039.heic | decoded | 150×150, 8-bit |
-| nokia-content__conformance__C040.heic | decoded | 1024×576, 8-bit |
-| nokia-content__conformance__C041.heic | rejected | timed-sequence: heic: timed image sequences are not supported |
-| nokia-content__conformance__C042.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C043.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C044.heic | rejected | hevc-still: heic: unsupported essential property rref |
-| nokia-content__conformance__C045.heic | decoded | 1024×768, 8-bit |
-| nokia-content__conformance__C046.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C047.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C048.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C049.heic | decoded | 1920×1080, 8-bit |
-| nokia-content__conformance__C050.heic | decoded | 1280×960, 8-bit |
-| nokia-content__conformance__C051.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C052.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__C053.heic | decoded | 1024×512, 8-bit |
-| nokia-content__conformance__C71.heic | rejected | hevc-still: heic: not a HEIC file |
-| nokia-content__conformance__MIAF001.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__MIAF002.heic | decoded | 2048×2048, 10-bit |
-| nokia-content__conformance__MIAF003.heic | decoded | 2048×2048, 8-bit |
-| nokia-content__conformance__MIAF004.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__MIAF005.heic | decoded | 1280×720, 8-bit |
-| nokia-content__conformance__MIAF006.heic | decoded | 1920×1440, 8-bit |
-| nokia-content__conformance__MIAF007.heic | decoded | 360×640, 8-bit |
-| nokia-content__conformance__multilayer001.heic | rejected | hevc-still: heic: multilayer HEVC NAL units are not supported |
-| nokia-content__conformance__multilayer002.heic | rejected | hevc-still: heic: multilayer HEVC NAL units are not supported |
-| nokia-content__conformance__multilayer003.heic | decoded | 1024×512, 8-bit |
-| nokia-content__conformance__multilayer004.heic | rejected | other-codec-avc1: heic: unsupported essential property avcC |
-| nokia-content__conformance__multilayer005.heic | rejected | hevc-still: heic: unsupported SPS extension |
-| nokia-content__imagecompression__big_tree.heic | decoded | 6088×4550, 10-bit |
-| nokia-content__nokia__XD64.heic | rejected | hevc-still: heic: invalid auxiliary image descriptor |
-| nokia-content__nokia__alpha_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__autumn_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__bird_burst.heic | decoded | 1280×720, 8-bit |
-| nokia-content__nokia__bothie_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__candle_animation.heic | decoded | 256×144, 8-bit |
-| nokia-content__nokia__cheers_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__compare_still_1.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__compare_still_2.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__compare_still_3.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__crowd_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__grid_960x640.heic | decoded | 960×640, 8-bit |
-| nokia-content__nokia__lights_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__meadow.heic | decoded | 5472×3648, 8-bit |
-| nokia-content__nokia__meadow.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__nokia__meadow_2k_vvc.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__nokia__old_bridge_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__overlay_1000x680.heic | decoded | 1000×680, 8-bit |
-| nokia-content__nokia__rally_burst.heic | decoded | 1280×720, 8-bit |
-| nokia-content__nokia__random_collection_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__sea1_animation.heic | decoded | 256×144, 8-bit |
-| nokia-content__nokia__season_collection_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__ski_jump_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__spring_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__starfield_animation.heic | decoded | 256×144, 8-bit |
-| nokia-content__nokia__stereo_1200x800.heic | decoded | 1200×800, 8-bit |
-| nokia-content__nokia__summer_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__surfer_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__nokia__winter_1440x960.heic | decoded | 1440×960, 8-bit |
-| nokia-content__personal__brutal-jurmala.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__personal__coffee-room.heic | decoded | 3024×4032, 8-bit |
-| nokia-content__personal__felines-old-factory.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__personal__kahvihuone2.heic | decoded | 3024×4032, 8-bit |
-| nokia-content__personal__lahde.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__personal__mr-victory.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__personal__mug.heic | decoded | 3024×4032, 8-bit |
-| nokia-content__personal__mug2.heic | decoded | 3024×4032, 8-bit |
-| nokia-content__personal__shades.heic | decoded | 3024×3024, 8-bit |
-| nokia-content__personal__sun_hdr_full_gainmap.heic | decoded | 256×256, 10-bit |
-| nokia-content__personal__vintage-supercar.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__pixabay__661512-finland-1493058.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__pixabay__ltapsah-road-6594010.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__pixabay__nord-bei-nordost-turku-2810087.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__unsplash__bricks.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__unsplash__bricksQP26.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__unsplash__sini-tiainen-oXEfEJ-hE7Q-unsplash (1).heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__unsplash__tapio-haaja-DTgvAa5pKO4-unsplash.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| nokia-content__unsplash__tapio-haaja-z9LKMs0P3bo-unsplash.heif | rejected | other-codec-vvc1: heic: not a HEIC file |
-| pillow-tests__images__heif__RGB_8__128x128.heif | decoded | 128×128, 8-bit |
-| pillow-tests__images__heif__RGB_8__29x100.heif | decoded | 29×100, 8-bit |
-| pillow-tests__images__heif__RGB_10__128x128.heif | decoded | 128×128, 10-bit |
-| pillow-tests__images__heif__RGB_10__29x100.heif | decoded | 29×100, 10-bit |
-| pillow-tests__images__heif__RGB_12__128x128.heif | decoded | 128×128, 12-bit |
-| pillow-tests__images__heif__RGB_12__29x100.heif | decoded | 29×100, 12-bit |
-| pillow-tests__images__heif__RGBA_8__128x128.heif | decoded | 128×128, 8-bit |
-| pillow-tests__images__heif__RGBA_8__29x100.heif | decoded | 29×100, 8-bit |
-| pillow-tests__images__heif__RGBA_10__128x128.heif | decoded | 128×128, 10-bit |
-| pillow-tests__images__heif__RGBA_10__29x100.heif | decoded | 29×100, 10-bit |
-| pillow-tests__images__heif__RGBA_12__128x128.heif | decoded | 128×128, 12-bit |
-| pillow-tests__images__heif__RGBA_12__29x100.heif | decoded | 29×100, 12-bit |
-| pillow-tests__images__heif__L_8__128x128.heif | decoded | 128×128, 8-bit |
-| pillow-tests__images__heif__L_8__29x100.heif | decoded | 29×100, 8-bit |
-| pillow-tests__images__heif__L_10__128x128.heif | decoded | 128×128, 10-bit |
-| pillow-tests__images__heif__L_10__29x100.heif | decoded | 29×100, 10-bit |
-| pillow-tests__images__heif__L_12__128x128.heif | decoded | 128×128, 12-bit |
-| pillow-tests__images__heif__L_12__29x100.heif | decoded | 29×100, 12-bit |
-| pillow-tests__images__heif__LA_8__128x128.heif | decoded | 128×128, 8-bit |
-| pillow-tests__images__heif__LA_8__29x100.heif | decoded | 29×100, 8-bit |
-| nokia-original-conformance__C006.heic | decoded | 1280×720, 8-bit |
+| File                                                                | Result   | Detail                                                        |
+| ------------------------------------------------------------------- | -------- | ------------------------------------------------------------- |
+| nokia-content__cc0__3A_HEIC_HDR.heic                                | decoded  | 8256×5504, 10-bit                                             |
+| nokia-content__cc0__3B_HEIC_SDR.heic                                | decoded  | 8256×5504, 10-bit                                             |
+| nokia-content__conformance__C001.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C002.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C003.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C004.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C005.heic                               | decoded  | 128×72, 8-bit                                                 |
+| nokia-content__conformance__C006.heic                               | rejected | hevc-still: heic: item 1005 carries no coded slices           |
+| nokia-content__conformance__C007.heic                               | decoded  | 2560×1440, 8-bit                                              |
+| nokia-content__conformance__C008.heic                               | decoded  | 720×1280, 8-bit                                               |
+| nokia-content__conformance__C009.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C010.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C011.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C012.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C013.heic                               | decoded  | 300×300, 8-bit                                                |
+| nokia-content__conformance__C014.heic                               | decoded  | 300×300, 8-bit                                                |
+| nokia-content__conformance__C015.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C016.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C017.heic                               | decoded  | 640×360, 8-bit                                                |
+| nokia-content__conformance__C018.heic                               | decoded  | 640×360, 8-bit                                                |
+| nokia-content__conformance__C019.heic                               | decoded  | 640×360, 8-bit                                                |
+| nokia-content__conformance__C020.heic                               | decoded  | 640×360, 8-bit                                                |
+| nokia-content__conformance__C021.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C022.heic                               | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__conformance__C023.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C024.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C025.heic                               | decoded  | 128×72, 8-bit                                                 |
+| nokia-content__conformance__C026.heic                               | rejected | timed-sequence: heic: timed image sequences are not supported |
+| nokia-content__conformance__C027.heic                               | rejected | timed-sequence: heic: timed image sequences are not supported |
+| nokia-content__conformance__C028.heic                               | rejected | timed-sequence: heic: timed image sequences are not supported |
+| nokia-content__conformance__C029.heic                               | rejected | timed-sequence: heic: timed image sequences are not supported |
+| nokia-content__conformance__C030.heic                               | rejected | timed-sequence: heic: timed image sequences are not supported |
+| nokia-content__conformance__C031.heic                               | rejected | timed-sequence: heic: timed image sequences are not supported |
+| nokia-content__conformance__C032.heic                               | rejected | timed-sequence: heic: timed image sequences are not supported |
+| nokia-content__conformance__C034.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C036.heic                               | rejected | timed-sequence: heic: timed image sequences are not supported |
+| nokia-content__conformance__C037.heic                               | rejected | timed-sequence: heic: timed image sequences are not supported |
+| nokia-content__conformance__C038.heic                               | rejected | timed-sequence: heic: timed image sequences are not supported |
+| nokia-content__conformance__C039.heic                               | decoded  | 150×150, 8-bit                                                |
+| nokia-content__conformance__C040.heic                               | decoded  | 1024×576, 8-bit                                               |
+| nokia-content__conformance__C041.heic                               | rejected | timed-sequence: heic: timed image sequences are not supported |
+| nokia-content__conformance__C042.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C043.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C044.heic                               | rejected | hevc-still: heic: unsupported essential property rref         |
+| nokia-content__conformance__C045.heic                               | decoded  | 1024×768, 8-bit                                               |
+| nokia-content__conformance__C046.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C047.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C048.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C049.heic                               | decoded  | 1920×1080, 8-bit                                              |
+| nokia-content__conformance__C050.heic                               | decoded  | 1280×960, 8-bit                                               |
+| nokia-content__conformance__C051.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C052.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__C053.heic                               | decoded  | 1024×512, 8-bit                                               |
+| nokia-content__conformance__C71.heic                                | rejected | hevc-still: heic: not a HEIC file                             |
+| nokia-content__conformance__MIAF001.heic                            | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__MIAF002.heic                            | decoded  | 2048×2048, 10-bit                                             |
+| nokia-content__conformance__MIAF003.heic                            | decoded  | 2048×2048, 8-bit                                              |
+| nokia-content__conformance__MIAF004.heic                            | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__MIAF005.heic                            | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__conformance__MIAF006.heic                            | decoded  | 1920×1440, 8-bit                                              |
+| nokia-content__conformance__MIAF007.heic                            | decoded  | 360×640, 8-bit                                                |
+| nokia-content__conformance__multilayer001.heic                      | rejected | hevc-still: heic: multilayer HEVC NAL units are not supported |
+| nokia-content__conformance__multilayer002.heic                      | rejected | hevc-still: heic: multilayer HEVC NAL units are not supported |
+| nokia-content__conformance__multilayer003.heic                      | decoded  | 1024×512, 8-bit                                               |
+| nokia-content__conformance__multilayer004.heic                      | rejected | other-codec-avc1: heic: unsupported essential property avcC   |
+| nokia-content__conformance__multilayer005.heic                      | rejected | hevc-still: heic: unsupported SPS extension                   |
+| nokia-content__imagecompression__big_tree.heic                      | decoded  | 6088×4550, 10-bit                                             |
+| nokia-content__nokia__XD64.heic                                     | rejected | hevc-still: heic: invalid auxiliary image descriptor          |
+| nokia-content__nokia__alpha_1440x960.heic                           | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__autumn_1440x960.heic                          | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__bird_burst.heic                               | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__nokia__bothie_1440x960.heic                          | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__candle_animation.heic                         | decoded  | 256×144, 8-bit                                                |
+| nokia-content__nokia__cheers_1440x960.heic                          | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__compare_still_1.heic                          | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__compare_still_2.heic                          | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__compare_still_3.heic                          | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__crowd_1440x960.heic                           | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__grid_960x640.heic                             | decoded  | 960×640, 8-bit                                                |
+| nokia-content__nokia__lights_1440x960.heic                          | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__meadow.heic                                   | decoded  | 5472×3648, 8-bit                                              |
+| nokia-content__nokia__meadow.heif                                   | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__nokia__meadow_2k_vvc.heif                            | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__nokia__old_bridge_1440x960.heic                      | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__overlay_1000x680.heic                         | decoded  | 1000×680, 8-bit                                               |
+| nokia-content__nokia__rally_burst.heic                              | decoded  | 1280×720, 8-bit                                               |
+| nokia-content__nokia__random_collection_1440x960.heic               | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__sea1_animation.heic                           | decoded  | 256×144, 8-bit                                                |
+| nokia-content__nokia__season_collection_1440x960.heic               | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__ski_jump_1440x960.heic                        | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__spring_1440x960.heic                          | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__starfield_animation.heic                      | decoded  | 256×144, 8-bit                                                |
+| nokia-content__nokia__stereo_1200x800.heic                          | decoded  | 1200×800, 8-bit                                               |
+| nokia-content__nokia__summer_1440x960.heic                          | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__surfer_1440x960.heic                          | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__nokia__winter_1440x960.heic                          | decoded  | 1440×960, 8-bit                                               |
+| nokia-content__personal__brutal-jurmala.heif                        | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__personal__coffee-room.heic                           | decoded  | 3024×4032, 8-bit                                              |
+| nokia-content__personal__felines-old-factory.heif                   | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__personal__kahvihuone2.heic                           | decoded  | 3024×4032, 8-bit                                              |
+| nokia-content__personal__lahde.heif                                 | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__personal__mr-victory.heif                            | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__personal__mug.heic                                   | decoded  | 3024×4032, 8-bit                                              |
+| nokia-content__personal__mug2.heic                                  | decoded  | 3024×4032, 8-bit                                              |
+| nokia-content__personal__shades.heic                                | decoded  | 3024×3024, 8-bit                                              |
+| nokia-content__personal__sun_hdr_full_gainmap.heic                  | decoded  | 256×256, 10-bit                                               |
+| nokia-content__personal__vintage-supercar.heif                      | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__pixabay__661512-finland-1493058.heif                 | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__pixabay__ltapsah-road-6594010.heif                   | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__pixabay__nord-bei-nordost-turku-2810087.heif         | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__unsplash__bricks.heif                                | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__unsplash__bricksQP26.heif                            | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__unsplash__sini-tiainen-oXEfEJ-hE7Q-unsplash (1).heif | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__unsplash__tapio-haaja-DTgvAa5pKO4-unsplash.heif      | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| nokia-content__unsplash__tapio-haaja-z9LKMs0P3bo-unsplash.heif      | rejected | other-codec-vvc1: heic: not a HEIC file                       |
+| pillow-tests__images__heif__RGB_8__128x128.heif                     | decoded  | 128×128, 8-bit                                                |
+| pillow-tests__images__heif__RGB_8__29x100.heif                      | decoded  | 29×100, 8-bit                                                 |
+| pillow-tests__images__heif__RGB_10__128x128.heif                    | decoded  | 128×128, 10-bit                                               |
+| pillow-tests__images__heif__RGB_10__29x100.heif                     | decoded  | 29×100, 10-bit                                                |
+| pillow-tests__images__heif__RGB_12__128x128.heif                    | decoded  | 128×128, 12-bit                                               |
+| pillow-tests__images__heif__RGB_12__29x100.heif                     | decoded  | 29×100, 12-bit                                                |
+| pillow-tests__images__heif__RGBA_8__128x128.heif                    | decoded  | 128×128, 8-bit                                                |
+| pillow-tests__images__heif__RGBA_8__29x100.heif                     | decoded  | 29×100, 8-bit                                                 |
+| pillow-tests__images__heif__RGBA_10__128x128.heif                   | decoded  | 128×128, 10-bit                                               |
+| pillow-tests__images__heif__RGBA_10__29x100.heif                    | decoded  | 29×100, 10-bit                                                |
+| pillow-tests__images__heif__RGBA_12__128x128.heif                   | decoded  | 128×128, 12-bit                                               |
+| pillow-tests__images__heif__RGBA_12__29x100.heif                    | decoded  | 29×100, 12-bit                                                |
+| pillow-tests__images__heif__L_8__128x128.heif                       | decoded  | 128×128, 8-bit                                                |
+| pillow-tests__images__heif__L_8__29x100.heif                        | decoded  | 29×100, 8-bit                                                 |
+| pillow-tests__images__heif__L_10__128x128.heif                      | decoded  | 128×128, 10-bit                                               |
+| pillow-tests__images__heif__L_10__29x100.heif                       | decoded  | 29×100, 10-bit                                                |
+| pillow-tests__images__heif__L_12__128x128.heif                      | decoded  | 128×128, 12-bit                                               |
+| pillow-tests__images__heif__L_12__29x100.heif                       | decoded  | 29×100, 12-bit                                                |
+| pillow-tests__images__heif__LA_8__128x128.heif                      | decoded  | 128×128, 8-bit                                                |
+| pillow-tests__images__heif__LA_8__29x100.heif                       | decoded  | 29×100, 8-bit                                                 |
+| nokia-original-conformance__C006.heic                               | decoded  | 1280×720, 8-bit                                               |
 
 ## Remaining failures
 
@@ -197,4 +197,3 @@ The demo is an independent library test harness. No actual Payhere development A
 - External coded pictures visited: 350; 48 duplicates; 301 unique pictures sample-exact (370,473,736 samples); one gain-map picture explicitly unsupported (range flags 486). This is not a 302/302 success claim.
 - External containers: 102/136 SDR decodes, 34 rejected, and one of the 102 has a separate HDR failure.
 - Packaged Node/Rspack production browser consumer passed; zero runtime dependencies.
-

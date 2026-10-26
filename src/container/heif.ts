@@ -1,4 +1,4 @@
-import { HeicError } from "../errors.js";
+import { HeicError } from '../errors.js';
 /** Generic ISOBMFF/HEIF container types (inherited from the ts-avif base). */
 export interface ISOBMFFBox {
   type: string;
@@ -60,7 +60,7 @@ export function parseISOBMFF(buffer: Uint8Array): ISOBMFFBox[] {
 
 function parseBoxes(buffer: Uint8Array, depth: number, budget: { count: number }): ISOBMFFBox[] {
   if (depth > 32)
-    throw new HeicError("RESOURCE_LIMIT", "heic: container nesting exceeds 32 levels");
+    throw new HeicError('RESOURCE_LIMIT', 'heic: container nesting exceeds 32 levels');
   const boxes: ISOBMFFBox[] = [];
   const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
 
@@ -68,7 +68,7 @@ function parseBoxes(buffer: Uint8Array, depth: number, budget: { count: number }
 
   while (offset + 8 <= buffer.length) {
     if (++budget.count > 100_000)
-      throw new HeicError("RESOURCE_LIMIT", "heic: container box count exceeds 100000");
+      throw new HeicError('RESOURCE_LIMIT', 'heic: container box count exceeds 100000');
     const size = view.getUint32(offset);
     const type = readFourCC(buffer, offset + 4);
 
@@ -111,7 +111,7 @@ function parseBoxes(buffer: Uint8Array, depth: number, budget: { count: number }
       // misinterpreted as the size field of a phantom first child,
       // which then masks every real child. `meta` and `iref` are the
       // FullBoxes in our `containerTypes` list — both need the skip.
-      const isFullBoxContainer = type === "meta" || type === "iref";
+      const isFullBoxContainer = type === 'meta' || type === 'iref';
       const childrenStart = isFullBoxContainer ? 4 : 0;
       box.children =
         data.length >= childrenStart
@@ -128,17 +128,17 @@ function parseBoxes(buffer: Uint8Array, depth: number, budget: { count: number }
 
 function isContainerBox(type: string): boolean {
   const containerTypes = [
-    "moov",
-    "trak",
-    "mdia",
-    "minf",
-    "stbl",
-    "dinf",
-    "meta",
-    "iprp",
-    "ipco",
-    "iref",
-    "grpl",
+    'moov',
+    'trak',
+    'mdia',
+    'minf',
+    'stbl',
+    'dinf',
+    'meta',
+    'iprp',
+    'ipco',
+    'iref',
+    'grpl',
   ];
   return containerTypes.includes(type);
 }
@@ -185,7 +185,7 @@ export function getFtypInfo(buffer: Uint8Array): FileTypeInfo | null {
 
   const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   const size = view.getUint32(0);
-  if (readFourCC(buffer, 4) !== "ftyp") return null;
+  if (readFourCC(buffer, 4) !== 'ftyp') return null;
 
   let boxSize = size;
   let headerSize = 8;
@@ -230,7 +230,6 @@ export function parseIloc(data: Uint8Array): ItemLocation[] {
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
 
   const version = data[0];
-  const flags = (data[1] << 16) | (data[2] << 8) | data[3];
 
   const offsetSize = (data[4] >> 4) & 0x0f;
   const lengthSize = data[4] & 0x0f;
@@ -352,7 +351,7 @@ export function parseIinf(data: Uint8Array): ItemInfo[] {
       data[offset + 7],
     );
 
-    if (entryType === "infe") {
+    if (entryType === 'infe') {
       const infeData = data.slice(offset + 8, offset + entrySize);
       const itemInfo = parseInfe(infeData);
       items.push(itemInfo);
@@ -399,7 +398,7 @@ function parseInfe(data: Uint8Array): ItemInfo {
   offset += 4;
 
   // Read null-terminated item name
-  let itemName = "";
+  let itemName = '';
   while (offset < data.length && data[offset] !== 0) {
     itemName += String.fromCharCode(data[offset]);
     offset++;
@@ -450,13 +449,13 @@ export function getImageData(
   itemId: number,
 ): Uint8Array | null {
   // Find meta box
-  const metaBox = findBox(boxes, "meta");
+  const metaBox = findBox(boxes, 'meta');
   if (!metaBox || !metaBox.children) {
     return null;
   }
 
   // Find iloc box
-  const ilocBox = findBox(metaBox.children, "iloc");
+  const ilocBox = findBox(metaBox.children, 'iloc');
   if (!ilocBox) {
     return null;
   }

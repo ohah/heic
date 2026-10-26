@@ -1,13 +1,13 @@
-import { HeicError, asHeicError } from "./errors.js";
-import { isHeic, type DecodeOptions } from "./decoder.js";
+import { HeicError, asHeicError } from './errors.js';
+import { isHeic, type DecodeOptions } from './decoder.js';
 import {
   createRenderContext,
   decodeNative,
   type NativeImage,
   type RenderContext,
-} from "./render.js";
-import { getHeicInfo, getItemPayload, parseIref } from "./container/heic.js";
-import { findBox, parseIinf } from "./container/heif.js";
+} from './render.js';
+import { getHeicInfo, getItemPayload, parseIref } from './container/heic.js';
+import { findBox, parseIinf } from './container/heif.js';
 
 export interface HdrOptions extends DecodeOptions {
   /** Target display/base-white ratio for gain maps. Omit for full stored headroom. */
@@ -23,10 +23,10 @@ export interface HdrImage {
   bitDepth: 8 | 10 | 12;
   data: Float32Array;
   hasAlpha: boolean;
-  colorSpace: "linear-srgb";
+  colorSpace: 'linear-srgb';
   headroom: number;
   sourceHeadroom: number;
-  source: "sdr" | "pq" | "hlg" | "apple-gainmap" | "iso-gainmap";
+  source: 'sdr' | 'pq' | 'hlg' | 'apple-gainmap' | 'iso-gainmap';
 }
 
 export const srgbToLinear = (v: number) =>
@@ -79,7 +79,7 @@ function primaryMatrix(primaries: number): number[] {
   if (primaries === 1 || primaries === 2) return IDENTITY;
   if (primaries === 12) return multiply(SRGB_FROM_XYZ, XYZ_FROM_P3);
   if (primaries === 9) return multiply(SRGB_FROM_XYZ, XYZ_FROM_2020);
-  throw new HeicError("UNSUPPORTED_FEATURE", "heic: HDR color primaries are not supported");
+  throw new HeicError('UNSUPPORTED_FEATURE', 'heic: HDR color primaries are not supported');
 }
 function iccProfile(bytes: Uint8Array): {
   transfer: number | null;
@@ -90,12 +90,12 @@ function iccProfile(bytes: Uint8Array): {
   const v = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength),
     text = new TextDecoder();
   const fail = () => {
-    throw new HeicError("INVALID_CONTAINER", "heic: malformed ICC profile");
+    throw new HeicError('INVALID_CONTAINER', 'heic: malformed ICC profile');
   };
   if (
     bytes.length < 132 ||
-    text.decode(bytes.subarray(36, 40)) !== "acsp" ||
-    text.decode(bytes.subarray(16, 20)) !== "RGB "
+    text.decode(bytes.subarray(36, 40)) !== 'acsp' ||
+    text.decode(bytes.subarray(16, 20)) !== 'RGB '
   )
     fail();
   const count = v.getUint32(128);
@@ -111,14 +111,14 @@ function iccProfile(bytes: Uint8Array): {
       new DataView(bytes.buffer, bytes.byteOffset + offset, length),
     );
   }
-  const cicp = tags.get("cicp"),
+  const cicp = tags.get('cicp'),
     transfer = cicp && cicp.byteLength >= 12 ? cicp.getUint8(9) : null,
     primaries = cicp && cicp.byteLength >= 12 ? cicp.getUint8(8) : null;
   const matrix: number[] = [];
-  for (const tag of ["rXYZ", "gXYZ", "bXYZ"]) {
+  for (const tag of ['rXYZ', 'gXYZ', 'bXYZ']) {
     const t = tags.get(tag);
     if (!t || t.byteLength < 20)
-      throw new HeicError("UNSUPPORTED_FEATURE", "heic: ICC LUT profiles are not supported");
+      throw new HeicError('UNSUPPORTED_FEATURE', 'heic: ICC LUT profiles are not supported');
     matrix.push(t.getInt32(8) / 65536, t.getInt32(12) / 65536, t.getInt32(16) / 65536);
   }
   const xyz = [
@@ -132,15 +132,15 @@ function iccProfile(bytes: Uint8Array): {
     matrix[5],
     matrix[8],
   ];
-  const curves = ["rTRC", "gTRC", "bTRC"].map((name) => {
+  const curves = ['rTRC', 'gTRC', 'bTRC'].map((name) => {
     const t = tags.get(name);
     if (!t || t.byteLength < 12) fail();
     const type = String.fromCharCode(...Array.from({ length: 4 }, (_, i) => t!.getUint8(i)));
-    if (type === "para") {
+    if (type === 'para') {
       const kind = t!.getUint16(8),
         n = [1, 3, 4, 5, 7][kind];
       if (!n || t!.byteLength < 12 + 4 * n)
-        throw new HeicError("UNSUPPORTED_FEATURE", "heic: ICC parametric curve is not supported");
+        throw new HeicError('UNSUPPORTED_FEATURE', 'heic: ICC parametric curve is not supported');
       const p = Array.from({ length: n }, (_, i) => t!.getInt32(12 + 4 * i) / 65536),
         [g, a, b, c, d, e, f] = p;
       return (x: number) =>
@@ -162,7 +162,7 @@ function iccProfile(bytes: Uint8Array): {
                   ? (a * x + b) ** g + e
                   : c * x + f;
     }
-    if (type === "curv") {
+    if (type === 'curv') {
       const n = t!.getUint32(8);
       if (n > 65536 || 12 + 2 * n > t!.byteLength) fail();
       if (n === 0) return (x: number) => x;
@@ -182,7 +182,7 @@ function iccProfile(bytes: Uint8Array): {
         );
       };
     }
-    throw new HeicError("UNSUPPORTED_FEATURE", "heic: ICC tone response curve is not supported");
+    throw new HeicError('UNSUPPORTED_FEATURE', 'heic: ICC tone response curve is not supported');
   });
   return {
     transfer,
@@ -215,10 +215,10 @@ function linearize(image: NativeImage, options: HdrOptions): HdrImage {
     else if (transfer === 1 || transfer === 6 || transfer === 14 || transfer === 15)
       rgb = rgb.map(rec709ToLinear);
     else if (transfer !== 8)
-      throw new HeicError("UNSUPPORTED_FEATURE", "heic: transfer function is not supported");
+      throw new HeicError('UNSUPPORTED_FEATURE', 'heic: transfer function is not supported');
     rgb = apply(matrix, rgb);
     if (rgb.some((v) => !Number.isFinite(v)))
-      throw new HeicError("INVALID_CONTAINER", "heic: non-finite HDR color value");
+      throw new HeicError('INVALID_CONTAINER', 'heic: non-finite HDR color value');
     out[i] = rgb[0];
     out[i + 1] = rgb[1];
     out[i + 2] = rgb[2];
@@ -230,21 +230,21 @@ function linearize(image: NativeImage, options: HdrOptions): HdrImage {
     bitDepth: image.bitDepth,
     data: out,
     hasAlpha: image.hasAlpha,
-    colorSpace: "linear-srgb",
+    colorSpace: 'linear-srgb',
     headroom: transfer === 16 ? 10000 / white : transfer === 18 ? peak / white : 1,
     sourceHeadroom: transfer === 16 ? 10000 / white : transfer === 18 ? peak / white : 1,
-    source: transfer === 16 ? "pq" : transfer === 18 ? "hlg" : "sdr",
+    source: transfer === 16 ? 'pq' : transfer === 18 ? 'hlg' : 'sdr',
   };
 }
 
 function metadata(ctx: RenderContext, itemId: number, type: string): Uint8Array[] {
-  const meta = findBox(ctx.boxes, "meta")!,
-    iinf = findBox(meta.children!, "iinf"),
-    iref = findBox(meta.children!, "iref"),
+  const meta = findBox(ctx.boxes, 'meta')!,
+    iinf = findBox(meta.children!, 'iinf'),
+    iref = findBox(meta.children!, 'iref'),
     items = iinf ? parseIinf(iinf.data) : [],
     refs = iref ? parseIref(iref) : [];
   return refs
-    .filter((ref) => ref.referenceType === "cdsc" && ref.toItemIds.includes(itemId))
+    .filter((ref) => ref.referenceType === 'cdsc' && ref.toItemIds.includes(itemId))
     .flatMap((ref) =>
       items.find((item) => item.itemId === ref.fromItemId)?.itemType === type
         ? [getItemPayload(ctx.input, ctx.boxes, ref.fromItemId)!]
@@ -277,7 +277,7 @@ function appleHeadroom(payload: Uint8Array): number | null {
     const start = v.getUint32(note.at, little);
     if (start + note.count > v.byteLength) return null;
     const bytes = tiff.subarray(start, start + note.count);
-    if (new TextDecoder().decode(bytes.subarray(0, 10)) !== "Apple iOS\0") return null;
+    if (new TextDecoder().decode(bytes.subarray(0, 10)) !== 'Apple iOS\0') return null;
     const n = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength),
       le = n.getUint16(12) === 0x4949;
     const real = (tag: number) => {
@@ -326,41 +326,41 @@ function sample(image: NativeImage, x: number, y: number, w: number, h: number, 
 export function decodeHDRSync(input: Uint8Array, options: HdrOptions = {}): HdrImage {
   try {
     if (!(input instanceof Uint8Array))
-      throw new HeicError("INVALID_INPUT", "heic: expected Uint8Array");
+      throw new HeicError('INVALID_INPUT', 'heic: expected Uint8Array');
     if (input.length > 64 * 1024 * 1024)
-      throw new HeicError("RESOURCE_LIMIT", "heic: input exceeds 64 MiB");
-    if (!isHeic(input)) throw new HeicError("UNSUPPORTED_FORMAT", "heic: not a HEIC file");
+      throw new HeicError('RESOURCE_LIMIT', 'heic: input exceeds 64 MiB');
+    if (!isHeic(input)) throw new HeicError('UNSUPPORTED_FORMAT', 'heic: not a HEIC file');
     for (const [name, value, min] of [
-      ["displayHeadroom", options.displayHeadroom ?? Number.POSITIVE_INFINITY, 1],
-      ["referenceWhiteNits", options.referenceWhiteNits ?? 203, 1],
-      ["displayPeakNits", options.displayPeakNits ?? 1000, 1],
+      ['displayHeadroom', options.displayHeadroom ?? Number.POSITIVE_INFINITY, 1],
+      ['referenceWhiteNits', options.referenceWhiteNits ?? 203, 1],
+      ['displayPeakNits', options.displayPeakNits ?? 1000, 1],
     ] as const)
       if (
         (!Number.isFinite(value) &&
-          !(name === "displayHeadroom" && value === Number.POSITIVE_INFINITY)) ||
+          !(name === 'displayHeadroom' && value === Number.POSITIVE_INFINITY)) ||
         value < min
       )
-        throw new HeicError("INVALID_OPTIONS", "heic: invalid " + name);
+        throw new HeicError('INVALID_OPTIONS', 'heic: invalid ' + name);
     const maxPixels = options.maxPixels ?? 50_000_000;
     if (!Number.isSafeInteger(maxPixels) || maxPixels < 1 || maxPixels > 50_000_000)
-      throw new HeicError("INVALID_OPTIONS", "heic: invalid maxPixels");
+      throw new HeicError('INVALID_OPTIONS', 'heic: invalid maxPixels');
     const ctx = createRenderContext(input, options),
       info = getHeicInfo(input, ctx.boxes);
-    if (info.primaryItemType === "tmap") return isoGainMap(ctx, info, options);
+    if (info.primaryItemType === 'tmap') return isoGainMap(ctx, info, options);
     const native = decodeNative(ctx),
       image = linearize(native, options),
       gain = info.auxiliaryImages.find(
-        (aux) => aux.type === "urn:com:apple:photo:2020:aux:hdrgainmap",
+        (aux) => aux.type === 'urn:com:apple:photo:2020:aux:hdrgainmap',
       );
     if (gain) {
-      const hasVersion = metadata(ctx, gain.itemId, "mime").some((bytes) =>
-        new TextDecoder().decode(bytes).includes("HDRGainMapVersion"),
+      const hasVersion = metadata(ctx, gain.itemId, 'mime').some((bytes) =>
+        new TextDecoder().decode(bytes).includes('HDRGainMapVersion'),
       );
-      const headroom = metadata(ctx, info.primaryItemId, "Exif")
+      const headroom = metadata(ctx, info.primaryItemId, 'Exif')
         .map(appleHeadroom)
         .find((value) => value !== null);
       if (!hasVersion || headroom === undefined || headroom === null)
-        throw new HeicError("INVALID_CONTAINER", "heic: Apple gain-map metadata is incomplete");
+        throw new HeicError('INVALID_CONTAINER', 'heic: Apple gain-map metadata is incomplete');
       const map = decodeNative(ctx, gain.itemId, true),
         limit = Math.min(headroom, options.displayHeadroom ?? Number.POSITIVE_INFINITY);
       for (let y = 0; y < image.height; y++)
@@ -375,7 +375,7 @@ export function decodeHDRSync(input: Uint8Array, options: HdrOptions = {}): HdrI
         }
       image.headroom = limit;
       image.sourceHeadroom = headroom;
-      image.source = "apple-gainmap";
+      image.source = 'apple-gainmap';
     }
     return image;
   } catch (error) {
@@ -396,12 +396,12 @@ interface IsoGainMetadata {
 }
 export function parseIsoGainMap(data: Uint8Array): IsoGainMetadata {
   if (data.length > 4096)
-    throw new HeicError("RESOURCE_LIMIT", "heic: ISO gain-map metadata exceeds 4096 bytes");
+    throw new HeicError('RESOURCE_LIMIT', 'heic: ISO gain-map metadata exceeds 4096 bytes');
   const v = new DataView(data.buffer, data.byteOffset, data.byteLength);
   let p = 0;
   const need = (n: number) => {
     if (p + n > data.length)
-      throw new HeicError("INVALID_CONTAINER", "heic: truncated ISO gain-map metadata");
+      throw new HeicError('INVALID_CONTAINER', 'heic: truncated ISO gain-map metadata');
   };
   const u8 = () => {
       need(1);
@@ -414,17 +414,17 @@ export function parseIsoGainMap(data: Uint8Array): IsoGainMetadata {
       return n;
     };
   if (u8() !== 0 || u16() !== 0)
-    throw new HeicError("UNSUPPORTED_FEATURE", "heic: unsupported ISO gain-map metadata version");
+    throw new HeicError('UNSUPPORTED_FEATURE', 'heic: unsupported ISO gain-map metadata version');
   u16(); // writer version is informative; minimum reader version was checked above.
   const flags = u8();
   if (flags & 63)
-    throw new HeicError("UNSUPPORTED_FEATURE", "heic: unsupported ISO gain-map flags");
+    throw new HeicError('UNSUPPORTED_FEATURE', 'heic: unsupported ISO gain-map flags');
   const ratio = (signed = false) => {
     need(8);
     const n = signed ? v.getInt32(p) : v.getUint32(p),
       d = v.getUint32(p + 4);
     p += 8;
-    if (d === 0) throw new HeicError("INVALID_CONTAINER", "heic: zero gain-map denominator");
+    if (d === 0) throw new HeicError('INVALID_CONTAINER', 'heic: zero gain-map denominator');
     return n / d;
   };
   const base = ratio(),
@@ -437,7 +437,7 @@ export function parseIsoGainMap(data: Uint8Array): IsoGainMetadata {
     baseOffset: number[] = [],
     alternateOffset: number[] = [];
   if (base === alternate || base >= 127 || alternate >= 127)
-    throw new HeicError("INVALID_CONTAINER", "heic: invalid gain-map headroom");
+    throw new HeicError('INVALID_CONTAINER', 'heic: invalid gain-map headroom');
   for (let c = 0; c < (multichannel ? 3 : 1); c++) {
     min.push(ratio(true));
     max.push(ratio(true));
@@ -445,10 +445,10 @@ export function parseIsoGainMap(data: Uint8Array): IsoGainMetadata {
     baseOffset.push(ratio(true));
     alternateOffset.push(ratio(true));
     if (max[c] < min[c] || gamma[c] <= 0)
-      throw new HeicError("INVALID_CONTAINER", "heic: invalid ISO gain-map channel parameters");
+      throw new HeicError('INVALID_CONTAINER', 'heic: invalid ISO gain-map channel parameters');
   }
   if (p !== data.length)
-    throw new HeicError("INVALID_CONTAINER", "heic: trailing ISO gain-map metadata");
+    throw new HeicError('INVALID_CONTAINER', 'heic: trailing ISO gain-map metadata');
   if (!multichannel)
     for (let c = 1; c < 3; c++)
       for (const array of [min, max, gamma, baseOffset, alternateOffset]) array[c] = array[0];
@@ -461,7 +461,7 @@ function inverse(m: number[]): number[] {
     C = d * h - e * g,
     det = a * A + b * B + c * C;
   if (!Number.isFinite(det) || Math.abs(det) < 1e-10)
-    throw new HeicError("INVALID_CONTAINER", "heic: singular color matrix");
+    throw new HeicError('INVALID_CONTAINER', 'heic: singular color matrix');
   return [
     A,
     c * h - b * i,
@@ -482,8 +482,8 @@ function isoGainMap(
   const payload = getItemPayload(ctx.input, ctx.boxes, info.primaryItemId);
   if (!payload || info.derivedItems.length !== 2)
     throw new HeicError(
-      "INVALID_CONTAINER",
-      "heic: ISO tone map must reference base and gain-map images",
+      'INVALID_CONTAINER',
+      'heic: ISO tone map must reference base and gain-map images',
     );
   const meta = parseIsoGainMap(payload),
     base = decodeNative(ctx, info.derivedItems[0]),
@@ -501,8 +501,8 @@ function isoGainMap(
   } else {
     if (!info.color && !info.icc)
       throw new HeicError(
-        "UNSUPPORTED_FEATURE",
-        "heic: ISO alternate working color space is unspecified",
+        'UNSUPPORTED_FEATURE',
+        'heic: ISO alternate working color space is unspecified',
       );
     const profile = info.icc ? iccProfile(info.icc) : null;
     matrix =
@@ -533,12 +533,12 @@ function isoGainMap(
         }
       const rgb = apply(matrix, working);
       if (rgb.some((v) => !Number.isFinite(v)))
-        throw new HeicError("INVALID_CONTAINER", "heic: non-finite gain-map output");
+        throw new HeicError('INVALID_CONTAINER', 'heic: non-finite gain-map output');
       image.data[i] = rgb[0];
       image.data[i + 1] = rgb[1];
       image.data[i + 2] = rgb[2];
     }
-  image.source = "iso-gainmap";
+  image.source = 'iso-gainmap';
   image.headroom = 2 ** target;
   image.sourceHeadroom = 2 ** Math.max(meta.base, meta.alternate);
   return image;

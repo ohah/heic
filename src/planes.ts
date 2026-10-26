@@ -1,13 +1,13 @@
-import { HeicError } from "./errors.js";
-import type { GridInfo, HeicInfo } from "./container/heic.js";
-import { getItemPayload, getHeicInfo } from "./container/heic.js";
-import type { ISOBMFFBox } from "./container/heif.js";
-import { parseSps } from "./hevc/sps.js";
-import { parsePps } from "./hevc/pps.js";
-import { PictureDecoder } from "./hevc/picture.js";
-import { splitLengthPrefixed, isSliceNal } from "./hevc/nal.js";
-import { deblockPicture } from "./hevc/deblock.js";
-import { applySao } from "./hevc/sao.js";
+import { HeicError } from './errors.js';
+import type { GridInfo, HeicInfo } from './container/heic.js';
+import { getItemPayload, getHeicInfo } from './container/heic.js';
+import type { ISOBMFFBox } from './container/heif.js';
+import { parseSps } from './hevc/sps.js';
+import { parsePps } from './hevc/pps.js';
+import { PictureDecoder } from './hevc/picture.js';
+import { splitLengthPrefixed, isSliceNal } from './hevc/nal.js';
+import { deblockPicture } from './hevc/deblock.js';
+import { applySao } from './hevc/sao.js';
 export interface Planes {
   chromaFormatIdc: number;
   y: Uint8Array | Uint16Array;
@@ -28,7 +28,7 @@ export function decodeItemPlanes(
   const nals = splitLengthPrefixed(payload, info.hvcC!.nalLengthSize);
   const slices = nals.filter((n) => isSliceNal(n.type)).map((n) => n.data);
   if (slices.length === 0)
-    throw new HeicError("INVALID_BITSTREAM", `heic: item ${itemId} carries no coded slices`);
+    throw new HeicError('INVALID_BITSTREAM', `heic: item ${itemId} carries no coded slices`);
 
   const config = getHeicInfo(buffer, boxes, itemId).hvcC ?? info.hvcC!;
   const sps = parseSps(config.sps[0]);
@@ -56,13 +56,13 @@ export function stitchGrid(
 ): Planes {
   const Samples = parseSps(info.hvcC!.sps[0]).bitDepthLuma === 8 ? Uint8Array : Uint16Array;
   if (grid.tileItemIds.length !== grid.rows * grid.columns || grid.tileItemIds.length > 4096)
-    throw new Error("heic: invalid or oversized grid");
+    throw new Error('heic: invalid or oversized grid');
   const tileW = grid.tileWidth;
   const tileH = grid.tileHeight;
   const canvasW = grid.columns * tileW;
   const canvasH = grid.rows * tileH;
   if (!Number.isSafeInteger(canvasW * canvasH) || canvasW * canvasH > 50_000_000)
-    throw new RangeError("heic: padded grid exceeds pixel limit");
+    throw new RangeError('heic: padded grid exceeds pixel limit');
   const y = new Samples(canvasW * canvasH);
   const chromaFormatIdc = parseSps(info.hvcC!.sps[0]).chromaFormatIdc,
     sub = chromaFormatIdc === 3 ? 1 : 2;
@@ -119,7 +119,7 @@ export function cropPlanes(
     x0 + width > planes.width ||
     y0 + height > planes.height
   )
-    throw new RangeError("heic: invalid crop bounds");
+    throw new RangeError('heic: invalid crop bounds');
   if (x0 === 0 && y0 === 0 && width === planes.width && height === planes.height) return planes;
   const Samples = planes.y instanceof Uint16Array ? Uint16Array : Uint8Array;
   const y = new Samples(width * height);

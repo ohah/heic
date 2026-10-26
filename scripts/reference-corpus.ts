@@ -1,33 +1,33 @@
 // Compare reconstructed codec samples against FFmpeg, before RGB/profile rendering.
-import { readFileSync, writeFileSync, mkdirSync, unlinkSync } from "node:fs";
-import { execFileSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import { getHeicInfo, getItemPayload } from "../src/container/heic";
-import { parseISOBMFF } from "../src/container/heif";
-import { parseSps } from "../src/hevc/sps";
-import { splitLengthPrefixed } from "../src/hevc/nal";
-import { decodeItemPlanes, cropPlanes } from "../src/planes";
-const directory = process.env.HEIC_CORPUS_DIR ?? "/tmp/heic-external-corpus",
-  output = "/tmp/heic-pixel-reference";
+import { readFileSync, writeFileSync, mkdirSync, unlinkSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { getHeicInfo, getItemPayload } from '../src/container/heic';
+import { parseISOBMFF } from '../src/container/heif';
+import { parseSps } from '../src/hevc/sps';
+import { splitLengthPrefixed } from '../src/hevc/nal';
+import { decodeItemPlanes, cropPlanes } from '../src/planes';
+const directory = process.env.HEIC_CORPUS_DIR ?? '/tmp/heic-external-corpus',
+  output = '/tmp/heic-pixel-reference';
 mkdirSync(output, { recursive: true });
-const corpus = JSON.parse(readFileSync(directory + "/results.json", "utf8"));
+const corpus = JSON.parse(readFileSync(directory + '/results.json', 'utf8'));
 if (
   corpus.length !==
-  JSON.parse(readFileSync(new URL("../test/corpus-manifest.json", import.meta.url), "utf8")).length
+  JSON.parse(readFileSync(new URL('../test/corpus-manifest.json', import.meta.url), 'utf8')).length
 )
-  throw Error("Run the complete corpus first");
+  throw Error('Run the complete corpus first');
 const results: any[] = [],
   seen = new Map<string, number>();
-const selection = process.env.HEIC_REFERENCE_FILES?.split(",");
-for (const file of corpus.filter((file: any) =>
-  selection ? selection.some((name) => file.name.includes(name)) : file.status === "decoded",
+const selection = process.env.HEIC_REFERENCE_FILES?.split(',');
+for (const file of corpus.filter((entry: any) =>
+  selection ? selection.some((name) => entry.name.includes(name)) : entry.status === 'decoded',
 )) {
-  const input = new Uint8Array(readFileSync(directory + "/" + file.name)),
+  const input = new Uint8Array(readFileSync(directory + '/' + file.name)),
     boxes = parseISOBMFF(input),
     ids = new Set<number>();
   const visit = (id?: number, stack = new Set<number>()) => {
     const info = getHeicInfo(input, boxes, id);
-    if (stack.has(info.primaryItemId)) throw Error("cycle");
+    if (stack.has(info.primaryItemId)) throw Error('cycle');
     stack.add(info.primaryItemId);
     if (info.grid) for (const child of info.grid.tileItemIds) visit(child, new Set(stack));
     else if (info.hvcC) ids.add(info.primaryItemId);
@@ -42,15 +42,15 @@ for (const file of corpus.filter((file: any) =>
       payload = getItemPayload(input, boxes, id)!,
       nals = splitLengthPrefixed(payload, config.nalLengthSize);
     const units = [...config.vps, ...config.sps, ...config.pps, ...nals.map((n) => n.data)],
-      hash = createHash("sha256");
+      hash = createHash('sha256');
     for (const unit of units) hash.update(unit);
-    const digest = hash.digest("hex");
+    const digest = hash.digest('hex');
     if (seen.has(digest)) {
       results.push({
         file: file.name,
         id,
         deduplicatedFrom: seen.get(digest),
-        status: "same-coded-picture",
+        status: 'same-coded-picture',
       });
       continue;
     }
@@ -62,31 +62,31 @@ for (const file of corpus.filter((file: any) =>
       const stream = Buffer.concat(units.flatMap((unit) => [Buffer.from([0, 0, 0, 1]), unit]));
       const pixel =
         sps.chromaFormatIdc === 0
-          ? `gray${sps.bitDepthLuma === 8 ? "" : sps.bitDepthLuma + "le"}`
-          : `yuv${sps.chromaFormatIdc === 3 ? "444" : "420"}p${sps.bitDepthLuma === 8 ? "" : sps.bitDepthLuma + "le"}`;
+          ? `gray${sps.bitDepthLuma === 8 ? '' : sps.bitDepthLuma + 'le'}`
+          : `yuv${sps.chromaFormatIdc === 3 ? '444' : '420'}p${sps.bitDepthLuma === 8 ? '' : sps.bitDepthLuma + 'le'}`;
       const reference = execFileSync(
-          process.env.HEIC_FFMPEG ?? "ffmpeg",
+          process.env.HEIC_FFMPEG ?? 'ffmpeg',
           [
-            "-hide_banner",
-            "-loglevel",
-            "error",
-            "-f",
-            "hevc",
-            "-i",
-            "pipe:0",
-            "-frames:v",
-            "1",
-            "-pix_fmt",
+            '-hide_banner',
+            '-loglevel',
+            'error',
+            '-f',
+            'hevc',
+            '-i',
+            'pipe:0',
+            '-frames:v',
+            '1',
+            '-pix_fmt',
             pixel,
-            "-f",
-            "rawvideo",
-            "pipe:1",
+            '-f',
+            'rawvideo',
+            'pipe:1',
           ],
           {
             input: stream,
             timeout: 60000,
             maxBuffer: 384 * 1024 * 1024,
-            stdio: ["pipe", "pipe", "pipe"],
+            stdio: ['pipe', 'pipe', 'pipe'],
           },
         ),
         bytes = sps.bitDepthLuma === 8 ? 1 : 2;
@@ -108,7 +108,7 @@ for (const file of corpus.filter((file: any) =>
         file: file.name,
         id,
         sha256: digest,
-        status: differences ? "mismatch" : "exact",
+        status: differences ? 'mismatch' : 'exact',
         width: decoded.width,
         height: decoded.height,
         bitDepth: sps.bitDepthLuma,
@@ -118,17 +118,17 @@ for (const file of corpus.filter((file: any) =>
         maxDelta,
       });
     } catch (error) {
-      results.push({ file: file.name, id, sha256: digest, status: "error", error: String(error) });
+      results.push({ file: file.name, id, sha256: digest, status: 'error', error: String(error) });
     }
     console.log(JSON.stringify(results.at(-1)));
-    writeFileSync(output + "/results.json", JSON.stringify(results, null, 2));
+    writeFileSync(output + '/results.json', JSON.stringify(results, null, 2));
   }
 }
-writeFileSync(output + "/results.json", JSON.stringify(results, null, 2));
-for (const file of ["sample.hevc", "sample.yuv"])
+writeFileSync(output + '/results.json', JSON.stringify(results, null, 2));
+for (const file of ['sample.hevc', 'sample.yuv'])
   try {
-    unlinkSync(output + "/" + file);
+    unlinkSync(output + '/' + file);
   } catch {}
-console.log("Coded pictures visited:", results.length, "unique:", seen.size);
-if (results.some((row) => row.status === "mismatch" || row.status === "error"))
+console.log('Coded pictures visited:', results.length, 'unique:', seen.size);
+if (results.some((row) => row.status === 'mismatch' || row.status === 'error'))
   process.exitCode = 1;

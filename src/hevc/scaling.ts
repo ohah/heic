@@ -4,8 +4,8 @@
  * the DEFAULT lists — the JPEG-like quantization matrices below — so dequant
  * must honor them, not the flat 16s.
  */
-import type { BitReader } from "./nal.js";
-import { getScan, SCAN_DIAG } from "./scan.js";
+import type { BitReader } from './nal.js';
+import { getScan, SCAN_DIAG } from './scan.js';
 
 /** lists[sizeId][matrixId] is a raster-order size x size matrix. */
 export interface ScalingListData {

@@ -1,4 +1,4 @@
-import { splitAnnexB } from "../../src/hevc/nal";
+import { splitAnnexB } from '../../src/hevc/nal';
 const u16 = (n: number) => {
   const b = Buffer.alloc(2);
   b.writeUInt16BE(n);
@@ -43,24 +43,24 @@ export function wrapHevc(
       ...list.flatMap((n) => [u16(n.data.length), n.data]),
     ]);
   });
-  const hvcc = box("hvcC", config, ...arrays);
+  const hvcc = box('hvcC', config, ...arrays);
   const slices = nals.filter((n) => n.type < 32);
   const payload = Buffer.concat(slices.flatMap((n) => [u32(n.data.length), n.data]));
-  const ftyp = box("ftyp", Buffer.from("heic"), u32(0), Buffer.from("heicmif1"));
+  const ftyp = box('ftyp', Buffer.from('heic'), u32(0), Buffer.from('heicmif1'));
   const meta = (offset: number) =>
     full(
-      "meta",
+      'meta',
       0,
-      full("hdlr", 0, u32(0), Buffer.from("pict"), Buffer.alloc(12), Buffer.from([0])),
-      full("pitm", 0, u16(1)),
+      full('hdlr', 0, u32(0), Buffer.from('pict'), Buffer.alloc(12), Buffer.from([0])),
+      full('pitm', 0, u16(1)),
       full(
-        "iinf",
+        'iinf',
         0,
         u16(1),
-        full("infe", 2, u16(1), u16(0), Buffer.from("hvc1"), Buffer.from([0])),
+        full('infe', 2, u16(1), u16(0), Buffer.from('hvc1'), Buffer.from([0])),
       ),
       full(
-        "iloc",
+        'iloc',
         0,
         Buffer.from([0x44, 0]),
         u16(1),
@@ -71,15 +71,15 @@ export function wrapHevc(
         u32(payload.length),
       ),
       box(
-        "iprp",
+        'iprp',
         box(
-          "ipco",
-          full("ispe", 0, u32(w), u32(h)),
-          full("pixi", 0, Buffer.from(chroma ? [3, depth, depth, depth] : [1, depth])),
+          'ipco',
+          full('ispe', 0, u32(w), u32(h)),
+          full('pixi', 0, Buffer.from(chroma ? [3, depth, depth, depth] : [1, depth])),
           hvcc,
         ),
-        full("ipma", 0, u32(1), u16(1), Buffer.from([3, 1, 2, 0x83])),
+        full('ipma', 0, u32(1), u16(1), Buffer.from([3, 1, 2, 0x83])),
       ),
     );
-  return Buffer.concat([ftyp, meta(ftyp.length + meta(0).length + 8), box("mdat", payload)]);
+  return Buffer.concat([ftyp, meta(ftyp.length + meta(0).length + 8), box('mdat', payload)]);
 }

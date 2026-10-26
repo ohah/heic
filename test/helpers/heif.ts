@@ -1,7 +1,7 @@
 // Small standards-shaped containers for codec/derived-image regression tests.
-import { readFileSync } from "node:fs";
-import { parseISOBMFF, findBox } from "../../src/container/heif";
-import { getHeicInfo, getItemPayload } from "../../src/container/heic";
+import { readFileSync } from 'node:fs';
+import { parseISOBMFF, findBox } from '../../src/container/heif';
+import { getHeicInfo, getItemPayload } from '../../src/container/heic';
 export const u16 = (n: number) => {
   const b = Buffer.alloc(2);
   b.writeUInt16BE(n);
@@ -31,18 +31,18 @@ export function codedFixture(depth = 8): Item {
     ),
     boxes = parseISOBMFF(input),
     m = getHeicInfo(input, boxes),
-    meta = findBox(boxes, "meta")!,
-    iprp = findBox(meta.children!, "iprp")!,
-    props = findBox(iprp.children!, "ipco")!.children!;
+    meta = findBox(boxes, 'meta')!,
+    iprp = findBox(meta.children!, 'iprp')!,
+    props = findBox(iprp.children!, 'ipco')!.children!;
   return {
     id: 1,
-    type: "hvc1",
+    type: 'hvc1',
     data: getItemPayload(input, boxes, m.primaryItemId)!,
     properties: props.map((p) => box(p.type, p.data)),
   };
 }
 export function buildHeif(items: Item[], primary: number): Uint8Array {
-  const ftyp = box("ftyp", Buffer.from("heic"), u32(0), Buffer.from("heicmif1"));
+  const ftyp = box('ftyp', Buffer.from('heic'), u32(0), Buffer.from('heicmif1'));
   const properties = items.flatMap((i) => i.properties),
     associations: Uint8Array[] = [];
   let propertyIndex = 1;
@@ -51,20 +51,20 @@ export function buildHeif(items: Item[], primary: number): Uint8Array {
     associations.push(Buffer.concat([u16(item.id), Buffer.from([indexes.length, ...indexes])]));
   }
   const iprp = box(
-    "iprp",
-    box("ipco", ...properties),
-    full("ipma", 0, u32(items.length), ...associations),
+    'iprp',
+    box('ipco', ...properties),
+    full('ipma', 0, u32(items.length), ...associations),
   );
   const iinf = full(
-    "iinf",
+    'iinf',
     0,
     u16(items.length),
     ...items.map((item) =>
-      full("infe", 2, u16(item.id), u16(0), Buffer.from(item.type), Buffer.from([0])),
+      full('infe', 2, u16(item.id), u16(0), Buffer.from(item.type), Buffer.from([0])),
     ),
   );
   const iref = full(
-    "iref",
+    'iref',
     0,
     ...items.flatMap((item) =>
       (item.refs ?? []).map((ref) =>
@@ -75,13 +75,13 @@ export function buildHeif(items: Item[], primary: number): Uint8Array {
   const meta = (start: number) => {
     let offset = start;
     return full(
-      "meta",
+      'meta',
       0,
-      full("hdlr", 0, u32(0), Buffer.from("pict"), Buffer.alloc(13)),
-      full("pitm", 0, u16(primary)),
+      full('hdlr', 0, u32(0), Buffer.from('pict'), Buffer.alloc(13)),
+      full('pitm', 0, u16(primary)),
       iinf,
       full(
-        "iloc",
+        'iloc',
         0,
         Buffer.from([0x44, 0]),
         u16(items.length),
@@ -104,11 +104,11 @@ export function buildHeif(items: Item[], primary: number): Uint8Array {
   return Buffer.concat([
     ftyp,
     meta(ftyp.length + meta(0).length + 8),
-    box("mdat", ...items.map((item) => item.data)),
+    box('mdat', ...items.map((item) => item.data)),
   ]);
 }
 export const nclx = () =>
-  box("colr", Buffer.from("nclx"), u16(1), u16(13), u16(6), Buffer.from([128]));
+  box('colr', Buffer.from('nclx'), u16(1), u16(13), u16(6), Buffer.from([128]));
 export function isoMetadata(multichannel = false): Uint8Array {
   const ratio = (n: number) => Buffer.concat([u32(n), u32(1)]);
   return Buffer.concat([
@@ -125,10 +125,10 @@ export function isoFixture(depth = 8): Uint8Array {
     gain = { ...codedFixture(depth), id: 2 },
     tmap: Item = {
       id: 3,
-      type: "tmap",
+      type: 'tmap',
       data: isoMetadata(),
-      properties: [full("ispe", 0, u32(64), u32(64)), nclx()],
-      refs: [{ type: "dimg", to: [1, 2] }],
+      properties: [full('ispe', 0, u32(64), u32(64)), nclx()],
+      refs: [{ type: 'dimg', to: [1, 2] }],
     };
   return buildHeif([base, gain, tmap], 3);
 }
@@ -139,9 +139,9 @@ export function alphaFixture(depth = 8): Uint8Array {
       id: 2,
       properties: [
         ...codedFixture(depth).properties,
-        full("auxC", 0, Buffer.from("urn:mpeg:hevc:2015:auxid:1\0")),
+        full('auxC', 0, Buffer.from('urn:mpeg:hevc:2015:auxid:1\0')),
       ],
-      refs: [{ type: "auxl", to: [1] }],
+      refs: [{ type: 'auxl', to: [1] }],
     };
   return buildHeif([color, alpha], 1);
 }

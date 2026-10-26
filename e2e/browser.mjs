@@ -1,30 +1,30 @@
-import assert from "node:assert/strict";
-import { createServer } from "node:http";
-import { readFile, mkdir, writeFile } from "node:fs/promises";
-import { resolve, extname, sep } from "node:path";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import assert from 'node:assert/strict';
+import { createServer } from 'node:http';
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import { resolve, extname, sep } from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 const exec = promisify(execFile);
-const root = resolve(import.meta.dirname, "..");
-const output = process.env.E2E_CAPTURE ?? "/tmp/ohah-heic-browser";
+const root = resolve(import.meta.dirname, '..');
+const output = process.env.E2E_CAPTURE ?? '/tmp/ohah-heic-browser';
 const rounds = Number(process.env.E2E_ROUNDS ?? 1);
-await exec("bun", ["scripts/feature-fixtures.ts", output + "/fixtures"], { cwd: root });
+await exec('bun', ['scripts/feature-fixtures.ts', output + '/fixtures'], { cwd: root });
 await mkdir(output, { recursive: true });
 const server = createServer(async (req, res) => {
   try {
-    if (req.url.startsWith("/features/")) {
-      const name = req.url.slice("/features/".length);
+    if (req.url.startsWith('/features/')) {
+      const name = req.url.slice('/features/'.length);
       if (!/^(alpha|iso)-(8|10|12)\.heic$/.test(name)) {
         res.writeHead(404);
         res.end();
         return;
       }
-      res.end(await readFile(output + "/fixtures/" + name));
+      res.end(await readFile(output + '/fixtures/' + name));
       return;
     }
     const path = resolve(
       root,
-      "." + decodeURIComponent(new URL(req.url, "http://localhost").pathname),
+      '.' + decodeURIComponent(new URL(req.url, 'http://localhost').pathname),
     );
     if (!path.startsWith(root + sep)) {
       res.writeHead(403);
@@ -33,9 +33,9 @@ const server = createServer(async (req, res) => {
     }
     const body = await readFile(path);
     res.setHeader(
-      "content-type",
-      { ".js": "text/javascript", ".html": "text/html", ".heic": "image/heic" }[extname(path)] ??
-        "application/octet-stream",
+      'content-type',
+      { '.js': 'text/javascript', '.html': 'text/html', '.heic': 'image/heic' }[extname(path)] ??
+        'application/octet-stream',
     );
     res.end(body);
   } catch {
@@ -43,58 +43,58 @@ const server = createServer(async (req, res) => {
     res.end();
   }
 });
-await new Promise((r) => server.listen(3048, "127.0.0.1", r));
+await new Promise((r) => server.listen(3048, '127.0.0.1', r));
 const ab = async (...args) =>
   (
-    await exec("agent-browser", ["--session", "ohah-heic", ...args], {
+    await exec('agent-browser', ['--session', 'ohah-heic', ...args], {
       timeout: 60000,
       maxBuffer: 4 * 1024 * 1024,
     })
   ).stdout.trim();
 const evaluate = async (code) =>
-  JSON.parse(await ab("eval", "-b", Buffer.from(code).toString("base64")));
+  JSON.parse(await ab('eval', '-b', Buffer.from(code).toString('base64')));
 const cases = [
-  ["8-bit 4:4:4", 8, "444"],
-  ["10-bit 4:4:4", 10, "444"],
-  ["12-bit 4:4:4", 12, "444"],
-  ["8-bit equivalence", 8, "pattern"],
-  ["10-bit equivalence", 10, "pattern"],
-  ["12-bit equivalence", 12, "pattern"],
-  ["8-bit gradient", 8, "gradient"],
-  ["10-bit gradient", 10, "gradient"],
-  ["12-bit gradient", 12, "gradient"],
-  ["input subarray", 10, "subarray"],
-  ["concurrent workers", 12, "concurrent"],
-  ["abort before worker", 8, "abort-before"],
-  ["abort in worker", 12, "abort-during"],
-  ["worker timeout", 8, "timeout"],
-  ["worker load failure", 8, "load-failure"],
-  ["invalid bytes main", 8, "invalid-main"],
-  ["invalid bytes worker", 8, "invalid-worker"],
-  ["pixel limit main", 8, "limit-main"],
-  ["pixel limit worker", 8, "limit-worker"],
-  ["truncated stream", 12, "truncated"],
-  ["invalid option", 8, "bad-option"],
-  ["real iPhone main/worker equivalence", 8, "iphone"],
-  ["recovery after worker errors", 12, "recovery"],
-  ["Blob input", 10, "blob"],
-  ["ArrayBuffer input", 12, "arraybuffer"],
-  ["structured error parity", 8, "error-parity"],
-  ["malformed worker response", 8, "bad-worker"],
-  ["HDR gain-map main/worker equivalence", 12, "hdr"],
-  ["auxiliary alpha main/worker equivalence", 8, "alpha"],
-  ["HDR in-flight cancellation", 8, "hdr-abort"],
+  ['8-bit 4:4:4', 8, '444'],
+  ['10-bit 4:4:4', 10, '444'],
+  ['12-bit 4:4:4', 12, '444'],
+  ['8-bit equivalence', 8, 'pattern'],
+  ['10-bit equivalence', 10, 'pattern'],
+  ['12-bit equivalence', 12, 'pattern'],
+  ['8-bit gradient', 8, 'gradient'],
+  ['10-bit gradient', 10, 'gradient'],
+  ['12-bit gradient', 12, 'gradient'],
+  ['input subarray', 10, 'subarray'],
+  ['concurrent workers', 12, 'concurrent'],
+  ['abort before worker', 8, 'abort-before'],
+  ['abort in worker', 12, 'abort-during'],
+  ['worker timeout', 8, 'timeout'],
+  ['worker load failure', 8, 'load-failure'],
+  ['invalid bytes main', 8, 'invalid-main'],
+  ['invalid bytes worker', 8, 'invalid-worker'],
+  ['pixel limit main', 8, 'limit-main'],
+  ['pixel limit worker', 8, 'limit-worker'],
+  ['truncated stream', 12, 'truncated'],
+  ['invalid option', 8, 'bad-option'],
+  ['real iPhone main/worker equivalence', 8, 'iphone'],
+  ['recovery after worker errors', 12, 'recovery'],
+  ['Blob input', 10, 'blob'],
+  ['ArrayBuffer input', 12, 'arraybuffer'],
+  ['structured error parity', 8, 'error-parity'],
+  ['malformed worker response', 8, 'bad-worker'],
+  ['HDR gain-map main/worker equivalence', 12, 'hdr'],
+  ['auxiliary alpha main/worker equivalence', 8, 'alpha'],
+  ['HDR in-flight cancellation', 8, 'hdr-abort'],
 ];
 const results = [];
 try {
-  await ab("open", "http://localhost:3048/demo/index.html");
+  await ab('open', 'http://localhost:3048/demo/index.html');
   await evaluate(
     `(()=>{const Native=Worker;window.__activeWorkers=0;window.Worker=class extends Native {constructor(...args){super(...args);this.ended=false;window.__activeWorkers++}terminate(){if(!this.ended){this.ended=true;window.__activeWorkers--}return super.terminate()}};return true})()`,
   );
   for (let round = 1; round <= rounds; round++) {
     await ab(
-      "set",
-      "viewport",
+      'set',
+      'viewport',
       String([320, 375, 440, 1024, 1440][(round - 1) % 5]),
       String(round % 2 ? 812 : 600),
     );
@@ -126,33 +126,41 @@ try {
    return {width:main.width,height:main.height,bitDepth:main.bitDepth,mainMs,workerMs,identical:true};
   })()`);
       assert.ok(result, name);
-      assert.equal(await evaluate("window.__activeWorkers"), 0, name + " leaked worker");
+      assert.equal(await evaluate('window.__activeWorkers'), 0, name + ' leaked worker');
       results.push({ round, case: i + 1, name, result });
-      console.log("PASS", round, i + 1, name);
+      console.log('PASS', round, i + 1, name);
     }
   }
-  await ab("set", "viewport", "375", "812");
-  await ab("upload", "#file", root + "/test/fixtures/conformance/pattern-12.heic");
-  await ab("wait", "--fn", "!document.querySelector('canvas').hidden");
-  await ab("screenshot", output + "/12-bit-worker.png");
-  await ab("select", "#execution", "main");
-  await ab("upload", "#file", root + "/test/fixtures/iphone-grid.heic");
-  await ab("wait", "--fn", "document.querySelector('canvas').height===4032");
-  await ab("screenshot", output + "/iphone-main.png");
-  await ab("select", "#execution", "worker");
-  await ab("upload", "#file", output + "/fixtures/alpha-12.heic");
-  await ab("wait", "--fn", "document.querySelector('#status').textContent.includes('alpha') && !document.querySelector('canvas').hidden");
-  await ab("screenshot", output + "/alpha-worker.png");
-  await ab("set", "viewport", "1440", "1000");
-  await ab("select", "#output", "hdr");
-  await ab("upload", "#file", root + "/test/fixtures/iphone-small.heic");
-  await ab("wait", "--fn", "document.querySelector('#status').textContent.includes('apple-gainmap') && !document.querySelector('canvas').hidden");
-  await ab("screenshot", output + "/hdr-sdr-preview.png");
-  await ab("upload", "#file", root + "/README.md");
-  await ab("wait", "--fn", "document.querySelector('#status').textContent.includes('not a HEIC')");
-  await ab("screenshot", output + "/invalid-input.png");
-  await writeFile(output + "/results.json", JSON.stringify(results, null, 2));
+  await ab('set', 'viewport', '375', '812');
+  await ab('upload', '#file', root + '/test/fixtures/conformance/pattern-12.heic');
+  await ab('wait', '--fn', "!document.querySelector('canvas').hidden");
+  await ab('screenshot', output + '/12-bit-worker.png');
+  await ab('select', '#execution', 'main');
+  await ab('upload', '#file', root + '/test/fixtures/iphone-grid.heic');
+  await ab('wait', '--fn', "document.querySelector('canvas').height===4032");
+  await ab('screenshot', output + '/iphone-main.png');
+  await ab('select', '#execution', 'worker');
+  await ab('upload', '#file', output + '/fixtures/alpha-12.heic');
+  await ab(
+    'wait',
+    '--fn',
+    "document.querySelector('#status').textContent.includes('alpha') && !document.querySelector('canvas').hidden",
+  );
+  await ab('screenshot', output + '/alpha-worker.png');
+  await ab('set', 'viewport', '1440', '1000');
+  await ab('select', '#output', 'hdr');
+  await ab('upload', '#file', root + '/test/fixtures/iphone-small.heic');
+  await ab(
+    'wait',
+    '--fn',
+    "document.querySelector('#status').textContent.includes('apple-gainmap') && !document.querySelector('canvas').hidden",
+  );
+  await ab('screenshot', output + '/hdr-sdr-preview.png');
+  await ab('upload', '#file', root + '/README.md');
+  await ab('wait', '--fn', "document.querySelector('#status').textContent.includes('not a HEIC')");
+  await ab('screenshot', output + '/invalid-input.png');
+  await writeFile(output + '/results.json', JSON.stringify(results, null, 2));
 } finally {
-  await ab("close");
+  await ab('close');
   await new Promise((r) => server.close(r));
 }

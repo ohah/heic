@@ -22,11 +22,7 @@
   },
   "synthetic": {
     "roundsPerChroma": 20,
-    "depths": [
-      8,
-      10,
-      12
-    ],
+    "depths": [8, 10, 12],
     "yuv420Exact": 60,
     "yuv444ExactWithDocumentedReferenceCorrection": 60
   },

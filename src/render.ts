@@ -1,9 +1,9 @@
-import { HeicError } from "./errors.js";
-import { getHeicInfo, getItemPayload, type HeicInfo } from "./container/heic.js";
-import { parseISOBMFF, type ISOBMFFBox } from "./container/heif.js";
-import { decodeItemPlanes, cropPlanes, stitchGrid, type Planes } from "./planes.js";
-import { parseSps } from "./hevc/sps.js";
-import type { DecodeOptions, HeicImageData } from "./decoder.js";
+import { HeicError } from './errors.js';
+import { getHeicInfo, getItemPayload, type HeicInfo } from './container/heic.js';
+import { parseISOBMFF, type ISOBMFFBox } from './container/heif.js';
+import { decodeItemPlanes, cropPlanes, stitchGrid, type Planes } from './planes.js';
+import { parseSps } from './hevc/sps.js';
+import type { DecodeOptions, HeicImageData } from './decoder.js';
 
 export interface NativeImage {
   width: number;
@@ -35,16 +35,16 @@ function checkSize(ctx: RenderContext, w: number, h: number) {
   const pixels = w * h,
     limit = ctx.options.maxPixels ?? 50_000_000;
   if (!Number.isSafeInteger(pixels) || w <= 0 || h <= 0 || pixels > limit || pixels > 50_000_000)
-    throw new HeicError("RESOURCE_LIMIT", "heic: derived image exceeds maxPixels");
+    throw new HeicError('RESOURCE_LIMIT', 'heic: derived image exceeds maxPixels');
   ctx.decodedPixels += pixels;
   if (ctx.decodedPixels > 200_000_000)
-    throw new HeicError("RESOURCE_LIMIT", "heic: derived decode work exceeds 200 million pixels");
+    throw new HeicError('RESOURCE_LIMIT', 'heic: derived decode work exceeds 200 million pixels');
 }
 
 function planePixels(
   planes: Planes,
   depth: 8 | 10 | 12,
-  color: NonNullable<HeicInfo["color"]>,
+  color: NonNullable<HeicInfo['color']>,
   auxiliary: boolean,
 ): Uint16Array {
   const { width: w, height: h } = planes,
@@ -55,7 +55,7 @@ function planePixels(
     kr = matrix === 1 ? 0.2126 : matrix === 9 ? 0.2627 : 0.299,
     kb = matrix === 1 ? 0.0722 : matrix === 9 ? 0.0593 : 0.114;
   if (!auxiliary && planes.cb.length && ![0, 1, 2, 5, 6, 9].includes(matrix))
-    throw new HeicError("UNSUPPORTED_FEATURE", "heic: unsupported YCbCr matrix");
+    throw new HeicError('UNSUPPORTED_FEATURE', 'heic: unsupported YCbCr matrix');
   const ys = color.fullRange ? 1 : max / (219 * factor),
     cs = color.fullRange ? 1 : max / (224 * factor),
     offset = color.fullRange ? 0 : 16 * factor;
@@ -97,15 +97,15 @@ function planePixels(
 function transform(image: NativeImage): NativeImage {
   let result = image;
   for (const step of image.info.transforms) {
-    if (step.type === "clap") {
+    if (step.type === 'clap') {
       const w = step.width,
         h = step.height,
         left = (result.width - w) / 2 + step.horizontalOffset,
         top = (result.height - h) / 2 + step.verticalOffset;
       if (![w, h, left, top].every(Number.isInteger))
         throw new HeicError(
-          "UNSUPPORTED_FEATURE",
-          "heic: fractional clean aperture resampling is not supported",
+          'UNSUPPORTED_FEATURE',
+          'heic: fractional clean aperture resampling is not supported',
         );
       if (
         w <= 0 ||
@@ -115,7 +115,7 @@ function transform(image: NativeImage): NativeImage {
         left + w > result.width ||
         top + h > result.height
       )
-        throw new HeicError("INVALID_CONTAINER", "heic: clean aperture is out of bounds");
+        throw new HeicError('INVALID_CONTAINER', 'heic: clean aperture is out of bounds');
       const out = new Uint16Array(w * h * 4);
       for (let y = 0; y < h; y++)
         out.set(
@@ -128,8 +128,8 @@ function transform(image: NativeImage): NativeImage {
       result = { ...result, width: w, height: h, data: out };
       continue;
     }
-    const rotate = step.type === "irot" ? step.value : 0,
-      mirror = step.type === "imir" ? step.value : null;
+    const rotate = step.type === 'irot' ? step.value : 0,
+      mirror = step.type === 'imir' ? step.value : null;
     if (!rotate && mirror === null) continue;
     const w = rotate % 2 ? result.height : result.width,
       h = rotate % 2 ? result.width : result.height,
@@ -170,24 +170,24 @@ export function decodeNative(
     info = getHeicInfo(input, boxes, itemId),
     id = info.primaryItemId;
   if (ctx.stack.has(id) || ctx.stack.size >= 32)
-    throw new HeicError("INVALID_CONTAINER", "heic: cyclic or deeply nested derived image");
+    throw new HeicError('INVALID_CONTAINER', 'heic: cyclic or deeply nested derived image');
   ctx.stack.add(id);
   try {
     let image: NativeImage;
-    if (info.primaryItemType === "iden" || info.primaryItemType === "tmap") {
-      if (info.derivedItems.length !== (info.primaryItemType === "iden" ? 1 : 2))
-        throw new HeicError("INVALID_CONTAINER", "heic: invalid derived image references");
+    if (info.primaryItemType === 'iden' || info.primaryItemType === 'tmap') {
+      if (info.derivedItems.length !== (info.primaryItemType === 'iden' ? 1 : 2))
+        throw new HeicError('INVALID_CONTAINER', 'heic: invalid derived image references');
       const base = decodeNative(ctx, info.derivedItems[0], auxiliary, false);
       image = {
         ...base,
         info: { ...info, color: info.color ?? base.info.color, icc: info.icc ?? base.info.icc },
       };
-    } else if (info.primaryItemType === "iovl") image = decodeOverlay(ctx, info);
+    } else if (info.primaryItemType === 'iovl') image = decodeOverlay(ctx, info);
     else {
       if (!info.hvcC)
         throw new HeicError(
-          "UNSUPPORTED_FEATURE",
-          "heic: unsupported derived item " + info.primaryItemType,
+          'UNSUPPORTED_FEATURE',
+          'heic: unsupported derived item ' + info.primaryItemType,
         );
       const sps = parseSps(info.hvcC.sps[0]),
         depth = sps.bitDepthLuma as 8 | 10 | 12;
@@ -273,7 +273,7 @@ export function decodeNative(
 function decodeOverlay(ctx: RenderContext, info: HeicInfo): NativeImage {
   const bytes = getItemPayload(ctx.input, ctx.boxes, info.primaryItemId);
   if (!bytes || bytes.length < 14 || bytes[0] !== 0 || bytes[1] & ~1)
-    throw new HeicError("INVALID_CONTAINER", "heic: invalid overlay header");
+    throw new HeicError('INVALID_CONTAINER', 'heic: invalid overlay header');
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength),
     wide = !!(bytes[1] & 1),
     size = wide ? 4 : 2;
@@ -281,7 +281,7 @@ function decodeOverlay(ctx: RenderContext, info: HeicInfo): NativeImage {
     height = wide ? view.getUint32(14) : view.getUint16(12),
     header = 10 + 2 * size;
   if (bytes.length !== header + info.derivedItems.length * 2 * size)
-    throw new HeicError("INVALID_CONTAINER", "heic: overlay offset count mismatch");
+    throw new HeicError('INVALID_CONTAINER', 'heic: overlay offset count mismatch');
   checkSize(ctx, width, height);
   // Overlay fill values are normalized unsigned 16-bit samples (HEIF iovl).
   const depth = ([8, 10, 12].includes(info.bitDepth) ? info.bitDepth : 8) as 8 | 10 | 12,
