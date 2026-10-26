@@ -1,0 +1,35 @@
+{
+  "name": "@ohah/heic",
+  "version": "0.1.0",
+  "description": "Pure TypeScript HEIC decoding with main-thread and worker APIs",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ohah/heic.git"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./worker": "./dist/worker.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "prepare": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/bun": "latest",
+    "ts-jpeg": "^0.3.1"
+  }
+}

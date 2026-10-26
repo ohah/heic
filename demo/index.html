@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>HEIC · pure TypeScript decoder</title>
+<style>body{font:16px system-ui;max-width:720px;margin:40px auto;padding:20px;background:#fafafa;color:#202124}button,input,select{font:inherit;padding:10px;margin:6px 0}canvas{max-width:100%;height:auto}pre{white-space:pre-wrap}label{display:block}</style>
+<h1>HEIC · pure TypeScript</h1><p>Decode locally, with no WASM or runtime dependencies.</p>
+<label>Execution <select id="execution"><option value="worker">Worker</option><option value="main">Main thread</option></select></label>
+<label>HEIC photo <input id="file" type="file" accept=".heic,.heif,image/heic,image/heif"></label>
+<pre id="status" role="status">Choose a HEIC file.</pre><canvas id="preview" hidden></canvas>
+<script type="module">
+import { decode } from '../dist/index.js';
+const file=document.querySelector('#file'),execution=document.querySelector('#execution'),status=document.querySelector('#status'),preview=document.querySelector('#preview');
+file.onchange=async()=>{const selected=file.files[0];if(!selected)return;preview.hidden=true;status.textContent='Decoding…';const started=performance.now();try{const image=await decode(new Uint8Array(await selected.arrayBuffer()),{execution:execution.value});preview.width=image.width;preview.height=image.height;preview.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(image.data),image.width,image.height),0,0);preview.hidden=false;status.textContent=`${image.width} × ${image.height} · ${image.bitDepth}-bit input → RGBA8 · ${execution.value} · ${Math.round(performance.now()-started)} ms`;}catch(error){status.textContent=error.message}};
+</script></html>
