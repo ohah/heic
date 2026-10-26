@@ -1,0 +1,954 @@
+[
+  {
+    "name": "nokia-content__cc0__3A_HEIC_HDR.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/cc0/3A_HEIC_HDR.heic",
+    "bytes": 2519873,
+    "sha256": "28bd0e388fad6c695550e6201dcee3cf3a453810f19a2fbed434940bd4f7433c",
+    "category": "cc0"
+  },
+  {
+    "name": "nokia-content__cc0__3B_HEIC_SDR.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/cc0/3B_HEIC_SDR.heic",
+    "bytes": 4479456,
+    "sha256": "0e366a983db397b1c1fbcb638e51ecbb6f2163f03f1e652f62ec8e192d96ce6e",
+    "category": "cc0"
+  },
+  {
+    "name": "nokia-content__conformance__C001.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C001.heic",
+    "bytes": 893729,
+    "sha256": "b0ea1bcca6f4a1317b7a513bbf23f279e3b47dc6c6ba22031d8939cceb341456",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C002.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C002.heic",
+    "bytes": 111897,
+    "sha256": "2b836102e528f7b465b295724b6928c5725a5ac3fe326c6bb54e5e8a18fc180f",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C003.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C003.heic",
+    "bytes": 224452,
+    "sha256": "ce14515a9be842859c340f6695c3c65911f356bf292cf84d1f23a2aeaec4b028",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C004.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C004.heic",
+    "bytes": 1117411,
+    "sha256": "a264dbd130397b93c11e7d48d8ed1c2afb150b168b202b6d2cea1ab7d5f8f4b4",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C005.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C005.heic",
+    "bytes": 113771,
+    "sha256": "8df455f463861613a3fc09327472739663c876af1d8d096f68cc3e16d25edeb8",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C006.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C006.heic",
+    "bytes": 112147,
+    "sha256": "2c903f704743ee0c1f52f2dd92cb7dde289a74f6068c89df6646557a5ce71df5",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C007.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C007.heic",
+    "bytes": 446514,
+    "sha256": "9b948314afed828fb29dd8265933145a2209c0abdc0fbb21bc17e060b3ba3706",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C008.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C008.heic",
+    "bytes": 224526,
+    "sha256": "1d4b5cce1192b0961e4d8505a62099d39ee4f6f6ba516892e730b567997e5987",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C009.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C009.heic",
+    "bytes": 224452,
+    "sha256": "7d1aa4012bb69a13fc4cad8d875368fa703407cd74c20363455b8520b791b412",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C010.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C010.heic",
+    "bytes": 224488,
+    "sha256": "35a82540cca9d9b38f7d6e3f304a0006696f5a9f20874d544be7ad63f6e105e6",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C011.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C011.heic",
+    "bytes": 254323,
+    "sha256": "99fdfcb7a0d7861c96747e3d2ac5fc25bff0ef3b39d530c9f52d07a0ed65d1c2",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C012.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C012.heic",
+    "bytes": 1246855,
+    "sha256": "07810b0333a75266d03293df90d6f1f3f989aa14c648da9f248b480e3bd10189",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C013.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C013.heic",
+    "bytes": 224534,
+    "sha256": "433057d6ee4faf13490fd616921889eabd7194e9e1bea9748be7e941d880255e",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C014.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C014.heic",
+    "bytes": 224629,
+    "sha256": "4acf8abc58bd5a8f9cc4e4f05e01a3712934d2a86824dd2ff65d3c92d8060176",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C015.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C015.heic",
+    "bytes": 224592,
+    "sha256": "b25c5191b40a1ba5fe6c5c281c5042499ac77b267529de90248fd7ad94104c11",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C016.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C016.heic",
+    "bytes": 112029,
+    "sha256": "0a8bc81b1ba4b8437e527a9fe3b254fe48933b0b5672ff6a23177f76b24950fb",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C017.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C017.heic",
+    "bytes": 60276,
+    "sha256": "7bd45ec3b278a601d4ba1905964856cf0003b15896adfffe3f645fd83c0417cd",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C018.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C018.heic",
+    "bytes": 60276,
+    "sha256": "67a5bde732421439557b9e43e601781210556456a040a43036af199f1880eae0",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C019.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C019.heic",
+    "bytes": 60276,
+    "sha256": "9f094bb21cd5cf5da53b354ea22c37a059390b1c121c4eafe88f359a0623f402",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C020.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C020.heic",
+    "bytes": 60276,
+    "sha256": "4f95f844cfa7615150a0acfe6dd6599228bceb7f76885a305a46278b666c26c3",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C021.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C021.heic",
+    "bytes": 112035,
+    "sha256": "addd129b0847cacd8d4cc2403e6baf337cfc30e978e1e54771f547156a17c12e",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C022.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C022.heic",
+    "bytes": 446514,
+    "sha256": "508b960d8e8f87eebdbdd316013ce6afa79c9335330d24cb53457b5e95dd5192",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C023.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C023.heic",
+    "bytes": 446710,
+    "sha256": "d234231144eed2ded99c97a4bdbbe0e115ee60fb0c7210a237c04cb666a35672",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C024.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C024.heic",
+    "bytes": 111999,
+    "sha256": "039cbb9631558d76fe8240a8c45f9a2a3a0645ba19bdf7665b9f9951e65c2764",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C025.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C025.heic",
+    "bytes": 17871,
+    "sha256": "2dbe1122a919d9cd0d5faf63c730cf39abe1dbaa31584c1dbb2c1196c011d59b",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C026.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C026.heic",
+    "bytes": 893418,
+    "sha256": "c2561b8da054723a5e85e4f551620c00e956d86bc07053c8ff44309c829876cd",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C027.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C027.heic",
+    "bytes": 465001,
+    "sha256": "7a2f66f785d38676fe5c4a2e37365617c80931052eb2aecc866154afb7c14cdc",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C028.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C028.heic",
+    "bytes": 450805,
+    "sha256": "2bafef3c563913e4653292da8be9b21a36fe15e87cdf6510dfaf588fe2e145b0",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C029.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C029.heic",
+    "bytes": 893466,
+    "sha256": "9b8678d222576f834c371d9cc499854b0a5c7bb8ceecbc816cdee2d3fbed42ad",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C030.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C030.heic",
+    "bytes": 893466,
+    "sha256": "018bf04b8ab7354f8d14a438a299cdd25e685e3217c7387508c47d32d91436d0",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C031.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C031.heic",
+    "bytes": 894029,
+    "sha256": "cf9e46d7ed8e899d091db068ded7b5e02aa00d33848463484eaa736b3aeb6558",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C032.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C032.heic",
+    "bytes": 907554,
+    "sha256": "7b14be0e0a0a8ae8c0909b0c594a8cdc7a16143e1cea3ce476f2be59bd4e5402",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C034.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C034.heic",
+    "bytes": 112147,
+    "sha256": "d2d61c040eba858cff05d7804c0999fb8955bcfe3ec99e5fd9f0b90d2dd2fe97",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C036.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C036.heic",
+    "bytes": 893454,
+    "sha256": "85b45f190ec7c3dd26f09ce703f9aa6c2edeadb69f4648044ba9c3a059fab8a4",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C037.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C037.heic",
+    "bytes": 893454,
+    "sha256": "86d538a4175b25cd2f75c31b64f4d2fce431adf4b0e9cf1239a01203d64cb8e4",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C038.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C038.heic",
+    "bytes": 893454,
+    "sha256": "a2b57365e6dbfdd96b20cabc12e47c02c9a137539f8313312a8841de8af6c7dc",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C039.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C039.heic",
+    "bytes": 112106,
+    "sha256": "507e4fe241b73e098050ac12d6cefe84efbf2acf0d7f8b0b23f23480f6911658",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C040.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C040.heic",
+    "bytes": 156836,
+    "sha256": "7d9160ff8f2e0f195c870484dee255383f549243ec782d70c3cc9431bc5ec268",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C041.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C041.heic",
+    "bytes": 52191,
+    "sha256": "7a90757b22d3448267f44cc163e19611961e1228cd67a614b6ac8c4144bf082d",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C042.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C042.heic",
+    "bytes": 111907,
+    "sha256": "ac0c075dfe02520fabc3d1b078d8502eabf950e77011a663dbd9015fbb886aeb",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C043.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C043.heic",
+    "bytes": 163718,
+    "sha256": "4d9e131a9e896625348b374605d4b65d62b64178d31c938b5302fb704c2a2042",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C044.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C044.heic",
+    "bytes": 146457,
+    "sha256": "550443448520e724af11734f86d51e50a8e42e3f4b5ed47debc2c5d25fdb3190",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C045.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C045.heic",
+    "bytes": 308053,
+    "sha256": "9dd45ad0c14713cf82703e753048580b22152c3f35aa4610e446418efb47d654",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C046.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C046.heic",
+    "bytes": 219956,
+    "sha256": "bf96038a23a7acd278315497c8384e8e7c1f01e93ee15852d7959b0ff0db5dc8",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C047.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C047.heic",
+    "bytes": 191043,
+    "sha256": "8c5fe84142d463ae621636f54603d33fdfa154072713477a58fc9a4c1de890ce",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C048.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C048.heic",
+    "bytes": 482892,
+    "sha256": "3c47929c8908605e0958e105172f07a834f5cb91da70bd35489f687dfb13690c",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C049.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C049.heic",
+    "bytes": 536942,
+    "sha256": "c63c05ee4a19f661d8454c02f537e80118123010c9bbba24c33a79fc11ab2389",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C050.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C050.heic",
+    "bytes": 816853,
+    "sha256": "3be11849d3b744c9a96e58dc22361a6f34fbb8db440326957529823cc43b5955",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C051.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C051.heic",
+    "bytes": 223513,
+    "sha256": "d7f22fca9974cca7e62e1481044b6b379c534a44ec97258ab4b28e95fd2caa59",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C052.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C052.heic",
+    "bytes": 112488,
+    "sha256": "05d2017881b23b1e9adc5585e9ec725b47dec1ca74b6854ba2375772f0b18166",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C053.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C053.heic",
+    "bytes": 14550,
+    "sha256": "c641d26a9189371f9320827ba035eb05bc241975fdc9e6e60540f52de3feae97",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__C71.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/C71.heic",
+    "bytes": 5597,
+    "sha256": "47601d59ee2d9a0ddc239b68f3e2a7d75c996ff6a2251edce003540bb04cabd9",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__MIAF001.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/MIAF001.heic",
+    "bytes": 113797,
+    "sha256": "c15fcd574e108a9a2933cb6e5e5680df1cbf1e917379d88306e6c89c63b22055",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__MIAF002.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/MIAF002.heic",
+    "bytes": 8837,
+    "sha256": "006baff837e3a8736154206f901a6595b0951eb62e282463e7dfc4a33c3da775",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__MIAF003.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/MIAF003.heic",
+    "bytes": 13826,
+    "sha256": "499c8ef32ff744f42b06cc89d6404dcc3754043d2251f4b6f8fedf2f6f04a513",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__MIAF004.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/MIAF004.heic",
+    "bytes": 113801,
+    "sha256": "6625d8a5f13390134c808ac3a86f7c2f293400f2efc381383502b2910415ebc1",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__MIAF005.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/MIAF005.heic",
+    "bytes": 893854,
+    "sha256": "d0dae956c59747326c2966786a1e88d3c8c2818ae5e701211da81328fa828d49",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__MIAF006.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/MIAF006.heic",
+    "bytes": 280345,
+    "sha256": "944952d316c9b1681afe67b2ad6a60bda53c9413ece54fe6a04f003b0cf5fd7d",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__MIAF007.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/MIAF007.heic",
+    "bytes": 113861,
+    "sha256": "370489520fd6f97dab4dbf2e81c1d77f9e19b0bfb28996245a2dc313af8ea81c",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__multilayer001.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/multilayer001.heic",
+    "bytes": 18582,
+    "sha256": "7b50db4483d31d78306cd1bf6e5b7d43d497d1cba6ac5b6895cadc546883164c",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__multilayer002.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/multilayer002.heic",
+    "bytes": 19699,
+    "sha256": "b4536629a8054a50e37c1d707a61c68b3f5f2284ec5fd36f6705c4e07063727e",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__multilayer003.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/multilayer003.heic",
+    "bytes": 14512,
+    "sha256": "8e3963d7a0f997ad78be13809cccbe125482c5c961a30a0cb043b6aba0c870cb",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__multilayer004.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/multilayer004.heic",
+    "bytes": 14132,
+    "sha256": "25fa4a3ff860370a1f1da643cd2b96a16520dd1255d7e70fbcac564374a49cfb",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__conformance__multilayer005.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/conformance/multilayer005.heic",
+    "bytes": 4608,
+    "sha256": "43cd906e0f04e12ceb007e683d637b68c72184f2118a69882e19f286c69f73d2",
+    "category": "conformance"
+  },
+  {
+    "name": "nokia-content__imagecompression__big_tree.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/imagecompression/big_tree.heic",
+    "bytes": 1329571,
+    "sha256": "5d335509aaa966c35ecb6690cd01476e06999d900748000a85e7456c8f25203b",
+    "category": "imagecompression"
+  },
+  {
+    "name": "nokia-content__nokia__XD64.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/XD64.heic",
+    "bytes": 1302,
+    "sha256": "7831f132520cb9f06a57acae343a694799ffd0382511a420f792a734a06e8485",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__alpha_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/alpha_1440x960.heic",
+    "bytes": 443075,
+    "sha256": "4dbbf50e1a0178261c46781bd764626fc75bf11549e744204c68ef212755c4c1",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__autumn_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/autumn_1440x960.heic",
+    "bytes": 293608,
+    "sha256": "00d9e0636b645036f77b3809fcd26a29df71b9ee66f2865fd8729b894aeabf59",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__bird_burst.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/bird_burst.heic",
+    "bytes": 470071,
+    "sha256": "b9cb7666f3cbd7d9240816befd1d7406f66cfd69c85440b091da37fe70743c14",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__bothie_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/bothie_1440x960.heic",
+    "bytes": 115021,
+    "sha256": "cb557402666dd4a148af3ccd4b8562cd71bad8196e8580d3d2bd00b2c1136534",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__candle_animation.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/candle_animation.heic",
+    "bytes": 15273,
+    "sha256": "c3678daa68f8c0f49fd268d9933b4307ebae6beb559435b0778118a2049d9413",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__cheers_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/cheers_1440x960.heic",
+    "bytes": 41389,
+    "sha256": "645877c52c5c656e2004b38f9520e717bbc6670541a56c098b9b7f78de496e8f",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__compare_still_1.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/compare_still_1.heic",
+    "bytes": 38272,
+    "sha256": "6ad2e1f457e83a6a67bbc2a97a7352057265cf33965e41c38a9e76baca4e007f",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__compare_still_2.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/compare_still_2.heic",
+    "bytes": 50479,
+    "sha256": "38a1ede1efd5ebc36006d712cfa064a6a541ce8821e2b501c5a0975e390761cc",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__compare_still_3.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/compare_still_3.heic",
+    "bytes": 117042,
+    "sha256": "551c9c85c87126214b414187265b0db0717087a6d7e5c0d7b7864ec6f475e53c",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__crowd_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/crowd_1440x960.heic",
+    "bytes": 130358,
+    "sha256": "c2d37dfde8ed66438b6670041f1a9e6b0814515c645e98330ca8509fa595ff16",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__grid_960x640.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/grid_960x640.heic",
+    "bytes": 97342,
+    "sha256": "e4aba270a555c1b4dc9773e2aef3a2b0888c6e7460b5f33b30d6a28ae9cb0d8a",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__lights_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/lights_1440x960.heic",
+    "bytes": 61201,
+    "sha256": "d875f214087e3be854dfd47edce538e599235bb6195a938c62c228ba71ef41d4",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__meadow.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/meadow.heic",
+    "bytes": 3105158,
+    "sha256": "9d7224e173ff557492ae607d6159222bede44e540f7dc0a983729f52b55cb665",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__meadow.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/meadow.heif",
+    "bytes": 2711555,
+    "sha256": "97e39125c7a08d2c9ddbca28ebb1f603c83213e8ec7b4e7b00e2f0d400daa48f",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__meadow_2k_vvc.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/meadow_2k_vvc.heif",
+    "bytes": 348880,
+    "sha256": "3e08c2df968e30137f2f36d3bf1de10ec7a409de7d409f1526d520c044cecc89",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__old_bridge_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/old_bridge_1440x960.heic",
+    "bytes": 134911,
+    "sha256": "6d42fe585aa71a033c5ff717db7a1b38368fb5659b0b2898bedd2fcca3d0f46c",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__overlay_1000x680.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/overlay_1000x680.heic",
+    "bytes": 97364,
+    "sha256": "c304ec0aca1cd33861cb174dec0a91364a865c7bd4bc2f72f457f9c6d86bb873",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__rally_burst.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/rally_burst.heic",
+    "bytes": 1017683,
+    "sha256": "f9e1bae9461f9c5b130a755416a49dd505a1756142235d47248e9bcf7d68a5c7",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__random_collection_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/random_collection_1440x960.heic",
+    "bytes": 458669,
+    "sha256": "b4f8d0380e88e7d93b315e351ade5ae4ff349876d5b2b09aec6903ffd2f687ae",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__sea1_animation.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/sea1_animation.heic",
+    "bytes": 428897,
+    "sha256": "0a8a43e60098bca790d50f119c8744c788300b6184051f765c54fae9d554694d",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__season_collection_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/season_collection_1440x960.heic",
+    "bytes": 793271,
+    "sha256": "e322991f877ea9340f6f01b76947b5013b437709ef2f7cd9391368e769112077",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__ski_jump_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/ski_jump_1440x960.heic",
+    "bytes": 117676,
+    "sha256": "73b290357a9f302cbf904c2321a258d168ba0aa5638bec9bae6592535190d781",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__spring_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/spring_1440x960.heic",
+    "bytes": 51764,
+    "sha256": "cc7f8e40f45610a342918439548765fe523dc193385832d42e5969a8eff2ced3",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__starfield_animation.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/starfield_animation.heic",
+    "bytes": 381368,
+    "sha256": "fbf31cd9aa6fc4c997d7eb2ea05541627bf3dbcb4115b7d453f63dcd1ec4fb26",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__stereo_1200x800.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/stereo_1200x800.heic",
+    "bytes": 259716,
+    "sha256": "6ddd7929f30d7e521bd34f24bf302962e3f956dd8f5e65f792006395630b8e33",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__summer_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/summer_1440x960.heic",
+    "bytes": 200508,
+    "sha256": "0ed414b84836a9d976cd91f96134cf616b8f2d113851d13a84319e1c647b45b9",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__surfer_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/surfer_1440x960.heic",
+    "bytes": 169861,
+    "sha256": "a3350fca6f92d8bf20bdac363813593e45682d7b33b65936d1960c20302768b6",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__nokia__winter_1440x960.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/nokia/winter_1440x960.heic",
+    "bytes": 248006,
+    "sha256": "a77f5e5383b0262750dd500a5a46e94c4cd6d6069bd51700f23cbaafee742aee",
+    "category": "nokia"
+  },
+  {
+    "name": "nokia-content__personal__brutal-jurmala.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/personal/brutal-jurmala.heif",
+    "bytes": 998270,
+    "sha256": "68fe18b48c6b5f3b371811d34f1287d075077d8fbfae1c4f8d659937a29fa90d",
+    "category": "personal"
+  },
+  {
+    "name": "nokia-content__personal__coffee-room.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/personal/coffee-room.heic",
+    "bytes": 1592400,
+    "sha256": "eb1d6fa215264ae00d3263283fc2b9e3e3efa7cf3c9cffa191e0ffc77fa83a38",
+    "category": "personal"
+  },
+  {
+    "name": "nokia-content__personal__felines-old-factory.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/personal/felines-old-factory.heif",
+    "bytes": 626045,
+    "sha256": "99613469e5d1b7c23be43b2b66dabc4ac06e78aa3cf0b7616ab78d32445d5dab",
+    "category": "personal"
+  },
+  {
+    "name": "nokia-content__personal__kahvihuone2.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/personal/kahvihuone2.heic",
+    "bytes": 1463850,
+    "sha256": "6938f60b74a584a2c22f8b4dddf289e2845d7cc6fb16dfa5a869f3dec7ae2cae",
+    "category": "personal"
+  },
+  {
+    "name": "nokia-content__personal__lahde.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/personal/lahde.heif",
+    "bytes": 1189380,
+    "sha256": "05762ef2c4901b4b166507d9ab09fa1da3dc14fb9416574235252448be14e0e0",
+    "category": "personal"
+  },
+  {
+    "name": "nokia-content__personal__mr-victory.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/personal/mr-victory.heif",
+    "bytes": 349445,
+    "sha256": "83e887ee909394bf8a4a34a727bdc216fd1afca30e0c1970041472e8849e921e",
+    "category": "personal"
+  },
+  {
+    "name": "nokia-content__personal__mug.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/personal/mug.heic",
+    "bytes": 813657,
+    "sha256": "aca979b578109b3d51cc495d1998638302c2235c94046a9dc0c9ed0727555153",
+    "category": "personal"
+  },
+  {
+    "name": "nokia-content__personal__mug2.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/personal/mug2.heic",
+    "bytes": 856153,
+    "sha256": "f81737e56b3f66c076e4dcebf4466b2f9f9d503553fe65a0e8f687c2eadd721a",
+    "category": "personal"
+  },
+  {
+    "name": "nokia-content__personal__shades.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/personal/shades.heic",
+    "bytes": 851584,
+    "sha256": "afacf25063928ab1ec9ece9273f43f40fc10c1576caf0f56a3469836c45ea0be",
+    "category": "personal"
+  },
+  {
+    "name": "nokia-content__personal__sun_hdr_full_gainmap.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/personal/sun_hdr_full_gainmap.heic",
+    "bytes": 6711,
+    "sha256": "615f4d13dcb2680c54556846c5e9b0aebeb1842a422ed5f5b5e87c35edb1b6c4",
+    "category": "personal"
+  },
+  {
+    "name": "nokia-content__personal__vintage-supercar.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/personal/vintage-supercar.heif",
+    "bytes": 1844693,
+    "sha256": "2f0a80607a57ab47d86670c8addacf91b849c546c6acd2aa7a192bbf6737e0f2",
+    "category": "personal"
+  },
+  {
+    "name": "nokia-content__pixabay__661512-finland-1493058.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/pixabay/661512-finland-1493058.heif",
+    "bytes": 142402,
+    "sha256": "04f40a52e780c45212ddbdf26b82324790537c33bd587db09dab55a96097eee6",
+    "category": "pixabay"
+  },
+  {
+    "name": "nokia-content__pixabay__ltapsah-road-6594010.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/pixabay/ltapsah-road-6594010.heif",
+    "bytes": 221046,
+    "sha256": "bd8ba379d2ecc7c2a8922e6b4323f6d5e891bdec5cc3b9945a52c73508f2065a",
+    "category": "pixabay"
+  },
+  {
+    "name": "nokia-content__pixabay__nord-bei-nordost-turku-2810087.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/pixabay/nord-bei-nordost-turku-2810087.heif",
+    "bytes": 1735737,
+    "sha256": "099771e29739d8a28c26098dd2d701c426ed3f69918cf77c8f3e598d3f33555f",
+    "category": "pixabay"
+  },
+  {
+    "name": "nokia-content__unsplash__bricks.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/unsplash/bricks.heif",
+    "bytes": 676265,
+    "sha256": "f95beda46f085ce368f622b2d5a39ea51059e016f1a4f1c818f53bb8b34c714e",
+    "category": "unsplash"
+  },
+  {
+    "name": "nokia-content__unsplash__bricksQP26.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/unsplash/bricksQP26.heif",
+    "bytes": 2526914,
+    "sha256": "11ad10315419dd2f9ba5f5d8f424305b5b9fff3ddfcb887314f3fdda3591057b",
+    "category": "unsplash"
+  },
+  {
+    "name": "nokia-content__unsplash__sini-tiainen-oXEfEJ-hE7Q-unsplash (1).heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/unsplash/sini-tiainen-oXEfEJ-hE7Q-unsplash%20%281%29.heif",
+    "bytes": 1831900,
+    "sha256": "c9cd2fd95a45fa7f4627a1b2d880aa8f952f43f5443cf6ca6c66533a9bea1cff",
+    "category": "unsplash"
+  },
+  {
+    "name": "nokia-content__unsplash__tapio-haaja-DTgvAa5pKO4-unsplash.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/unsplash/tapio-haaja-DTgvAa5pKO4-unsplash.heif",
+    "bytes": 543070,
+    "sha256": "49250d473b417e39ffb1e856e6e32fb9a792a670026ba9aa95640ba74f9d6415",
+    "category": "unsplash"
+  },
+  {
+    "name": "nokia-content__unsplash__tapio-haaja-z9LKMs0P3bo-unsplash.heif",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif/f01283f3e64ccc6e6ab489bd556d454879069185/content/unsplash/tapio-haaja-z9LKMs0P3bo-unsplash.heif",
+    "bytes": 482205,
+    "sha256": "a9f2dc3505964b87c4dbd3d80445be0caad51d36a9cb72d9a45e8ad8b5ea7fdd",
+    "category": "unsplash"
+  },
+  {
+    "name": "pillow-tests__images__heif__RGB_8__128x128.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/RGB_8__128x128.heif",
+    "bytes": 6647,
+    "sha256": "b1f3c0578b52525e95d1db617286879aee76779eb2e507fc57d3ce2a3ab527f9",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__RGB_8__29x100.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/RGB_8__29x100.heif",
+    "bytes": 3479,
+    "sha256": "a28a4106084425aaf4b5b77aba75c397ed4a0d87857c1f349bd0ab7bb35fc884",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__RGB_10__128x128.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/RGB_10__128x128.heif",
+    "bytes": 11637,
+    "sha256": "7fbf1573c1e5c1693953b31bb287327c53eaefa74a6f1324e7391a08b3ed1e73",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__RGB_10__29x100.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/RGB_10__29x100.heif",
+    "bytes": 3939,
+    "sha256": "de9fb1f2a906425b30e0717dcc9397d80ea020605a92134632b3e3901f171eb0",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__RGB_12__128x128.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/RGB_12__128x128.heif",
+    "bytes": 18468,
+    "sha256": "92c048d4bead7eebd3e0da5cb13a2e286cccbde3acb23580ee9c5f6b4cfde812",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__RGB_12__29x100.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/RGB_12__29x100.heif",
+    "bytes": 5575,
+    "sha256": "c1b5c9f5917c5be22f7ea7f9de5de8a3c0f8bd6a3ebc19a6c8aa321beef26b97",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__RGBA_8__128x128.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/RGBA_8__128x128.heif",
+    "bytes": 16015,
+    "sha256": "df634be2fa51f3d9a244dc9c987d7179411814e7b171bc40273a4486181c559f",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__RGBA_8__29x100.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/RGBA_8__29x100.heif",
+    "bytes": 5934,
+    "sha256": "3caa04dd0353cac9b38c41da2980fa02dc0d2b6a967ec71c5f7ae2a05ab77c59",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__RGBA_10__128x128.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/RGBA_10__128x128.heif",
+    "bytes": 14085,
+    "sha256": "ca7bc70f1d8b1103e7094c3758a70991ad31e2cbcabb02f4ec7e79e5a6d4bc5f",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__RGBA_10__29x100.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/RGBA_10__29x100.heif",
+    "bytes": 5049,
+    "sha256": "0499c3a3d8aa1c4383494f90cc127a693f036ab6228f0b91ddcf96f662520129",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__RGBA_12__128x128.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/RGBA_12__128x128.heif",
+    "bytes": 22821,
+    "sha256": "7baf5a4e786fa381ac3e7675fd8245c886dadd4ef5c006bccfc6ac7f901a39f5",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__RGBA_12__29x100.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/RGBA_12__29x100.heif",
+    "bytes": 7253,
+    "sha256": "92fd6e2154a8ed5b8c07edc969869fb038b95e4dff742f04da6b6eeeef556378",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__L_8__128x128.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/L_8__128x128.heif",
+    "bytes": 2560,
+    "sha256": "d386c35ece16c8bdcf31fb5de150ecc596a94b23d5dd9057a71d0ddfe1261d71",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__L_8__29x100.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/L_8__29x100.heif",
+    "bytes": 2790,
+    "sha256": "4fbbb035e6444bd6d661aefa4597d757cd0ea451a07b2c8fc37a46c269540baf",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__L_10__128x128.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/L_10__128x128.heif",
+    "bytes": 1710,
+    "sha256": "48287d8982f06a647674c8e1e9b557d829fc21111da34ee06e1dc750505edf74",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__L_10__29x100.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/L_10__29x100.heif",
+    "bytes": 1004,
+    "sha256": "796d56d8e9b31413fbe274874a2a121799a276ff26499368527518799f406476",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__L_12__128x128.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/L_12__128x128.heif",
+    "bytes": 1176,
+    "sha256": "83f07a856195b7efa0e3c81e52f250a762ad5e56c0b8fddbb8db74f3d616cc9a",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__L_12__29x100.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/L_12__29x100.heif",
+    "bytes": 1125,
+    "sha256": "f3dee921639a77ea3bf0920a43e4abb6e052fee4e0f8ab45fa9b2bbf93a7a213",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__LA_8__128x128.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/LA_8__128x128.heif",
+    "bytes": 11781,
+    "sha256": "4bf91141a445a9c4d6e14a6cd62209934a2703593e4433594d6a7415b4d0256f",
+    "category": "pillow-real"
+  },
+  {
+    "name": "pillow-tests__images__heif__LA_8__29x100.heif",
+    "source": "https://raw.githubusercontent.com/bigcat88/pillow_heif/b16be1196dfa465a342d68894696e685ca3655cb/tests/images/heif/LA_8__29x100.heif",
+    "bytes": 4287,
+    "sha256": "e45fdefe5740f4ed5d1e4f9b6f7a9d87d5e69fe26d10e2a90b36c1b6aa0234c3",
+    "category": "pillow-real"
+  },
+  {
+    "name": "nokia-original-conformance__C006.heic",
+    "source": "https://raw.githubusercontent.com/nokiatech/heif_conformance/6ff1e33481d325296d8a787432453ef3fa91f591/conformance_files/C006.heic",
+    "bytes": 112445,
+    "sha256": "41699c9a89dacb7a9536f43ae98f6554b9f272feb7397174cdc38b25387d7934",
+    "category": "original-conformance"
+  }
+]

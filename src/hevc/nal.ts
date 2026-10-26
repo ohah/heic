@@ -1,3 +1,4 @@
+import { HeicError } from '../errors.js';
 /**
  * HEVC (H.265) NAL unit handling: splitting item payloads, unescaping RBSP,
  * and reading NAL headers. This layer is complete; the slice decoder that
@@ -19,14 +20,14 @@ export enum NalType {
 }
 
 export interface NalUnit {
-  type: NalType
+  type: NalType;
   /** Full NAL payload including the 2-byte header. */
-  data: Uint8Array
+  data: Uint8Array;
 }
 
 /** Whether the NAL type carries a coded slice (what a still image decodes). */
 export function isSliceNal(type: number): boolean {
-  return (type >= 0 && type <= 9) || (type >= 16 && type <= 21)
+  return (type >= 0 && type <= 9) || (type >= 16 && type <= 21);
 }
 
 /**
@@ -34,52 +35,58 @@ export function isSliceNal(type: number): boolean {
  * prefix size from `hvcC.nalLengthSize`) into NAL units.
  */
 export function splitLengthPrefixed(payload: Uint8Array, nalLengthSize: number): NalUnit[] {
-  const nals: NalUnit[] = []
-  let p = 0
+  if (!Number.isInteger(nalLengthSize) || nalLengthSize < 1 || nalLengthSize > 4)
+    throw new HeicError('INVALID_BITSTREAM', 'heic: invalid NAL length prefix size');
+  const nals: NalUnit[] = [];
+  let p = 0;
   while (p + nalLengthSize <= payload.length) {
-    let len = 0
-    for (let i = 0; i < nalLengthSize; i++)
-      len = (len << 8) | payload[p + i]
-    p += nalLengthSize
-    if (len <= 0 || p + len > payload.length)
-      break
-    const data = payload.subarray(p, p + len)
-    nals.push({ type: (data[0] >> 1) & 0x3F, data })
-    p += len
+    let len = 0;
+    for (let i = 0; i < nalLengthSize; i++) len = len * 256 + payload[p + i];
+    p += nalLengthSize;
+    if (len < 2 || p + len > payload.length)
+      throw new HeicError('INVALID_BITSTREAM', 'heic: truncated or invalid length-prefixed NAL');
+    const data = payload.subarray(p, p + len);
+    if (data[0] & 128 || !(data[1] & 7))
+      throw new HeicError('INVALID_BITSTREAM', 'heic: invalid NAL header');
+    if (data[0] & 1 || data[1] >> 3)
+      throw new HeicError(
+        'UNSUPPORTED_FEATURE',
+        'heic: multilayer HEVC NAL units are not supported',
+      );
+    nals.push({ type: (data[0] >> 1) & 0x3f, data });
+    p += len;
   }
-  return nals
+  if (p !== payload.length)
+    throw new HeicError('INVALID_BITSTREAM', 'heic: truncated NAL length prefix');
+  return nals;
 }
 
 /** Split an Annex-B stream (00 00 01 start codes) into NAL units. */
 export function splitAnnexB(stream: Uint8Array): NalUnit[] {
-  const nals: NalUnit[] = []
+  const nals: NalUnit[] = [];
 
-  const findStartCode = (from: number): { prefix: number, payload: number } | null => {
+  const findStartCode = (from: number): { prefix: number; payload: number } | null => {
     for (let i = from; i + 2 < stream.length; i++) {
-      if (stream[i] !== 0 || stream[i + 1] !== 0)
-        continue
-      if (stream[i + 2] === 1)
-        return { prefix: i, payload: i + 3 }
+      if (stream[i] !== 0 || stream[i + 1] !== 0) continue;
+      if (stream[i + 2] === 1) return { prefix: i, payload: i + 3 };
       if (stream[i + 2] === 0 && i + 3 < stream.length && stream[i + 3] === 1)
-        return { prefix: i, payload: i + 4 }
+        return { prefix: i, payload: i + 4 };
     }
-    return null
-  }
+    return null;
+  };
 
-  let current = findStartCode(0)
+  let current = findStartCode(0);
   while (current) {
-    const next = findStartCode(current.payload)
-    let end = next?.prefix ?? stream.length
-    while (end > current.payload && stream[end - 1] === 0)
-      end--
+    const next = findStartCode(current.payload);
+    let end = next?.prefix ?? stream.length;
+    while (end > current.payload && stream[end - 1] === 0) end--;
 
-    const data = stream.subarray(current.payload, end)
-    if (data.length >= 2)
-      nals.push({ type: (data[0] >> 1) & 0x3F, data })
-    current = next
+    const data = stream.subarray(current.payload, end);
+    if (data.length >= 2) nals.push({ type: (data[0] >> 1) & 0x3f, data });
+    current = next;
   }
 
-  return nals
+  return nals;
 }
 
 /**
@@ -87,59 +94,59 @@ export function splitAnnexB(stream: Uint8Array): NalUnit[] {
  * returning the raw byte sequence payload (RBSP) after the 2-byte header.
  */
 export function toRbsp(nal: Uint8Array): Uint8Array {
-  const out = new Uint8Array(nal.length - 2)
-  let o = 0
-  let zeros = 0
+  const out = new Uint8Array(nal.length - 2);
+  let o = 0;
+  let zeros = 0;
   for (let i = 2; i < nal.length; i++) {
-    const b = nal[i]
+    const b = nal[i];
     if (zeros >= 2 && b === 0x03) {
-      zeros = 0
-      continue // skip the emulation prevention byte
+      zeros = 0;
+      continue; // skip the emulation prevention byte
     }
-    out[o++] = b
-    zeros = b === 0 ? zeros + 1 : 0
+    out[o++] = b;
+    zeros = b === 0 ? zeros + 1 : 0;
   }
-  return out.subarray(0, o)
+  return out.subarray(0, o);
 }
 
 /** MSB-first bit reader with Exp-Golomb support, used across the decoder. */
 export class BitReader {
-  private pos = 0
+  private pos = 0;
   constructor(private data: Uint8Array) {}
 
   readBit(): number {
-    if (this.pos >= this.data.length * 8) throw new Error("heic: truncated bitstream")
-    const byte = this.data[this.pos >> 3]
-    const bit = (byte >> (7 - (this.pos & 7))) & 1
-    this.pos++
-    return bit
+    if (this.pos >= this.data.length * 8)
+      throw new HeicError('INVALID_BITSTREAM', 'heic: truncated bitstream');
+    const byte = this.data[this.pos >> 3];
+    const bit = (byte >> (7 - (this.pos & 7))) & 1;
+    this.pos++;
+    return bit;
   }
 
   readBits(n: number): number {
-    let v = 0
-    for (let i = 0; i < n; i++)
-      v = (v << 1) | this.readBit()
-    return v >>> 0
+    let v = 0;
+    for (let i = 0; i < n; i++) v = (v << 1) | this.readBit();
+    return v >>> 0;
   }
 
   /** ue(v): unsigned Exp-Golomb. */
   ue(): number {
-    let zeros = 0
-    while (this.readBit() === 0 && zeros < 32) zeros++
-    if (zeros > 30) throw new Error("heic: Exp-Golomb value exceeds supported range")
-    let v = (1 << zeros) - 1
-    if (zeros > 0)
-      v += this.readBits(zeros)
-    return v
+    let zeros = 0;
+    while (this.readBit() === 0 && zeros < 32) zeros++;
+    if (zeros > 30)
+      throw new HeicError('INVALID_BITSTREAM', 'heic: Exp-Golomb value exceeds supported range');
+    let v = (1 << zeros) - 1;
+    if (zeros > 0) v += this.readBits(zeros);
+    return v;
   }
 
   /** se(v): signed Exp-Golomb. */
   se(): number {
-    const k = this.ue()
-    return (k & 1) ? (k + 1) >> 1 : -(k >> 1)
+    const k = this.ue();
+    return k & 1 ? (k + 1) >> 1 : -(k >> 1);
   }
 
   get bitPosition(): number {
-    return this.pos
+    return this.pos;
   }
 }

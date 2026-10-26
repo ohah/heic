@@ -1,11 +1,108 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>HEIC · pure TypeScript decoder</title>
-<style>body{font:16px system-ui;max-width:720px;margin:40px auto;padding:20px;background:#fafafa;color:#202124}button,input,select{font:inherit;padding:10px;margin:6px 0}canvas{max-width:100%;height:auto}pre{white-space:pre-wrap}label{display:block}</style>
-<h1>HEIC · pure TypeScript</h1><p>Decode locally, with no WASM or runtime dependencies.</p>
-<label>Execution <select id="execution"><option value="worker">Worker</option><option value="main">Main thread</option></select></label>
-<label>HEIC photo <input id="file" type="file" accept=".heic,.heif,image/heic,image/heif"></label>
-<pre id="status" role="status">Choose a HEIC file.</pre><canvas id="preview" hidden></canvas>
-<script type="module">
-import { decode } from '../dist/index.js';
-const file=document.querySelector('#file'),execution=document.querySelector('#execution'),status=document.querySelector('#status'),preview=document.querySelector('#preview');
-file.onchange=async()=>{const selected=file.files[0];if(!selected)return;preview.hidden=true;status.textContent='Decoding…';const started=performance.now();try{const image=await decode(new Uint8Array(await selected.arrayBuffer()),{execution:execution.value});preview.width=image.width;preview.height=image.height;preview.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(image.data),image.width,image.height),0,0);preview.hidden=false;status.textContent=`${image.width} × ${image.height} · ${image.bitDepth}-bit input → RGBA8 · ${execution.value} · ${Math.round(performance.now()-started)} ms`;}catch(error){status.textContent=error.message}};
-</script></html>
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>
+    HEIC · pure TypeScript decoder
+  </title>
+  <style>
+    body {
+      font: 16px system-ui;
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #fafafa;
+      color: #202124;
+    }
+    button,
+    input,
+    select {
+      font: inherit;
+      padding: 10px;
+      margin: 6px 0;
+    }
+    canvas {
+      max-width: 100%;
+      height: auto;
+      background: repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 0/20px 20px;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+    label {
+      display: block;
+    }
+  </style>
+  <h1>HEIC · pure TypeScript</h1>
+  <p>Decode locally, with no WASM or runtime dependencies.</p>
+  <label
+    >Execution
+    <select id="execution">
+      <option value="worker">Worker</option>
+      <option value="main">Main thread</option>
+    </select></label
+  >
+  <label
+    >Output
+    <select id="output">
+      <option value="sdr">RGBA8</option>
+      <option value="hdr">Linear HDR → SDR preview</option>
+    </select></label
+  >
+  <label
+    >HEIC photo <input id="file" type="file" accept=".heic,.heif,image/heic,image/heif"
+  /></label>
+  <pre id="status" role="status">Choose a HEIC file.</pre>
+  <canvas id="preview" hidden></canvas>
+  <script type="module">
+    import { decode, decodeHDR } from '../dist/index.js';
+    const file = document.querySelector('#file'),
+      execution = document.querySelector('#execution'),
+      output = document.querySelector('#output'),
+      status = document.querySelector('#status'),
+      preview = document.querySelector('#preview');
+    let controller,
+      request = 0;
+    async function render() {
+      const selected = file.files[0];
+      if (!selected) return;
+      controller?.abort();
+      controller = new AbortController();
+      const id = ++request;
+      preview.hidden = true;
+      status.textContent = 'Decoding…';
+      const started = performance.now();
+      try {
+        const hdr = output.value === 'hdr';
+        const image = await (hdr ? decodeHDR : decode)(selected, {
+          execution: execution.value,
+          signal: controller.signal,
+        });
+        if (id !== request) return;
+        let bytes = new Uint8ClampedArray(image.data.length);
+        if (hdr) {
+          for (let i = 0; i < bytes.length; i++) {
+            if (i % 4 === 3) {
+              bytes[i] = Math.round(image.data[i] * 255);
+              continue;
+            }
+            const linear = Math.max(0, image.data[i]),
+              mapped = linear / (1 + linear),
+              srgb = mapped <= 0.0031308 ? 12.92 * mapped : 1.055 * mapped ** (1 / 2.4) - 0.055;
+            bytes[i] = Math.round(srgb * 255);
+          }
+        } else bytes.set(image.data);
+        preview.width = image.width;
+        preview.height = image.height;
+        preview
+          .getContext('2d')
+          .putImageData(new ImageData(bytes, image.width, image.height), 0, 0);
+        preview.hidden = false;
+        status.textContent = `${image.width} × ${image.height} · ${image.bitDepth}-bit input · ${image.hasAlpha ? 'alpha · ' : ''}${execution.value} · ${Math.round(performance.now() - started)} ms${hdr ? `\n${image.source} · stored headroom ${image.sourceHeadroom.toFixed(2)}\nSDR Reinhard preview of linear-sRGB data; this canvas does not verify HDR display output.` : ' → RGBA8'}`;
+      } catch (error) {
+        if (id === request) status.textContent = error?.message ?? String(error);
+      }
+    }
+    file.onchange = render;
+    execution.onchange = render;
+    output.onchange = render;
+  </script>
+</html>

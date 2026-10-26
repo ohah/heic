@@ -3,3 +3,10 @@ Sources: FFmpeg lavfi testsrc2 and gradients (no external photographs).
 .heic: one intra HEVC picture in a minimal HEIF container.
 .yuv: FFmpeg-decoded planar YUV420; 8-bit bytes or little-endian 16-bit samples.
 Each vector is checked sample-by-sample before RGB conversion.
+
+chroma444-{8,10,12}: scripts/adversarial-reference.ts, HEIC_CHROMA=3, round 5,
+seed=5*7919+depth, 256x128, CRF45/AQ2/WPP, default scaling lists, transform skip.
+Planar 4:4:4 reference; 8-bit bytes or LE16 10/12-bit samples.
+The 12-bit reference uses the QP74/75 table correction to FFmpeg 8.1.1
+described in docs/VALIDATION.md. Unmodified FFmpeg produces incorrect chroma
+for that case. A separately encoded x265 API reconstruction was also compared.

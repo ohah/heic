@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-26",
+  "externalContainers": {
+    "attempted": 136,
+    "sdrDecoded": 102,
+    "rejected": 34,
+    "hdrIncompleteAmongSdrDecoded": 1
+  },
+  "codedPictures": {
+    "visited": 350,
+    "statuses": {
+      "exact": 301,
+      "same-coded-picture": 48,
+      "error": 1
+    },
+    "exactSamples": 370473736
+  },
+  "browser": {
+    "rounds": 20,
+    "casesPerRound": 30,
+    "passed": 600
+  },
+  "synthetic": {
+    "roundsPerChroma": 20,
+    "depths": [8, 10, 12],
+    "yuv420Exact": 60,
+    "yuv444ExactWithDocumentedReferenceCorrection": 60
+  },
+  "runtimeDependencies": 0,
+  "remainingFeatures": [
+    "timed/inter prediction",
+    "multilayer HEVC",
+    "SlimHEIF mini",
+    "range-extension gain map and older ISO metadata"
+  ]
+}
