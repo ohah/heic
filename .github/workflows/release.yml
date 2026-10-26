@@ -1,0 +1,150 @@
+name: npm Release
+
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - 'package.json'
+      - 'bun.lock'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'npm에 배포하지 않고 패키지와 인증만 검증'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate npm package
+    runs-on: ubuntu-latest
+    outputs:
+      dist_tag: ${{ steps.package.outputs.dist_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate release ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            version=$(node -p "require('./package.json').version")
+            if [[ "$GITHUB_REF_NAME" != "v$version" ]]; then
+              echo '::error::태그와 package.json 버전이 일치하지 않습니다.'
+              exit 1
+            fi
+            git merge-base --is-ancestor HEAD origin/main
+          elif [[ "$GITHUB_EVENT_NAME" != pull_request && "$GITHUB_REF" != refs/heads/main ]]; then
+            echo '::error::수동 배포 검증은 main에서 실행하세요.'
+            exit 1
+          fi
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - run: bun run lint
+      - run: bun run format:check
+      - run: bun run typecheck
+      - run: bun test
+      - run: bun run build
+      - name: Pack and audit package
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/heic-package"
+          npm pack --ignore-scripts --json --pack-destination "$RUNNER_TEMP/heic-package" > "$RUNNER_TEMP/heic-package/pack.json"
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync, readdirSync, appendFileSync } from 'node:fs';
+          import { join } from 'node:path';
+          const root = join(process.env.RUNNER_TEMP, 'heic-package');
+          const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+          const [packed] = JSON.parse(readFileSync(join(root, 'pack.json'), 'utf8'));
+          assert.equal(pkg.name, '@ohah/heic');
+          assert.equal(pkg.publishConfig.access, 'public');
+          assert.equal(pkg.publishConfig.registry, 'https://registry.npmjs.org/');
+          assert.equal(Object.keys(pkg.dependencies ?? {}).length, 0);
+          for (const file of packed.files) {
+            assert.match(file.path, /^(dist\/|package\.json$|README\.md$|LICENSE$|NOTICE$)/);
+          }
+          for (const required of ['dist/index.js', 'dist/index.d.ts', 'dist/worker.js', 'LICENSE', 'NOTICE']) {
+            assert.ok(packed.files.some(file => file.path === required), `Missing ${required}`);
+          }
+          assert.equal(readdirSync(root).filter(file => file.endsWith('.tgz')).length, 1);
+          appendFileSync(process.env.GITHUB_OUTPUT, `dist_tag=${pkg.version.includes('-') ? 'next' : 'latest'}\n`);
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### 패키지 검증 통과\n\n${pkg.name}@${pkg.version}: ${packed.files.length}개 파일, ${packed.size} bytes\n`);
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-package
+          path: ${{ runner.temp }}/heic-package/*.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish or dry-run
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/@ohah/heic
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      DIST_TAG: ${{ needs.validate.outputs.dist_tag }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-package
+          path: ${{ runner.temp }}/heic-package
+      - name: Verify npm authentication
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$NODE_AUTH_TOKEN" ]]; then
+            echo '::error::GitHub npm 환경에 NPM_TOKEN을 등록하세요.'
+            exit 1
+          fi
+          npm whoami --registry=https://registry.npmjs.org/
+      - name: Publish validated tarball
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          packages=("$RUNNER_TEMP"/heic-package/*.tgz)
+          if [[ "${#packages[@]}" != 1 ]]; then
+            echo '::error::검증된 패키지 파일이 정확히 하나여야 합니다.'
+            exit 1
+          fi
+          if [[ "$DRY_RUN" == true ]]; then
+            npm publish "${packages[0]}" --dry-run --access public --tag "$DIST_TAG" --ignore-scripts
+            echo '### 사전 검증 완료: npm에 실제 배포하지 않았습니다.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            npm publish "${packages[0]}" --access public --provenance --tag "$DIST_TAG" --ignore-scripts
+            echo '### npm 배포 완료' >> "$GITHUB_STEP_SUMMARY"
+          fi
