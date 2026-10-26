@@ -33,6 +33,7 @@ function applyPlane(
   sao: SaoParams[],
   cIdx: number,
   bitDepth: number,
+  skip: (x:number,y:number)=>boolean,
 ): void {
   const maxVal = (1 << bitDepth) - 1
   const clip = (v: number): number => v < 0 ? 0 : v > maxVal ? maxVal : v
@@ -59,6 +60,7 @@ function applyPlane(
           for (let i = 0; i < w; i++) {
             const x = xC + i
             const y = yC + j
+            if (skip(x,y)) continue
             const x0 = x + cls.h[0]
             const y0 = y + cls.v[0]
             const x1 = x + cls.h[1]
@@ -79,6 +81,7 @@ function applyPlane(
           bandTable[(k + leftClass) & 31] = k + 1
         for (let j = 0; j < h; j++) {
           for (let i = 0; i < w; i++) {
+            if (skip(xC+i,yC+j)) continue
             const idx = (yC + j) * width + (xC + i)
             const bandIdx = bandTable[src[idx] >> bandShift]
             if (bandIdx > 0)
@@ -100,19 +103,22 @@ export function applySao(pic: DecodedPicture, sps: SpsInfo, bitDepth = 8): void 
   const ctbSize = 1 << sps.log2CtbSize
   const widthInCtbs = Math.ceil(pic.width / ctbSize)
   const heightInCtbs = Math.ceil(pic.height / ctbSize)
-  const cw = pic.width >> 1
-  const ch = pic.height >> 1
+  const sub=sps.chromaFormatIdc===3?1:2
+  const cw = pic.width / sub
+  const ch = pic.height / sub
 
+  const bypass=(x:number,y:number)=>!!pic.bypassMap?.[(y>>2)*(pic.width>>2)+(x>>2)]
+  const bypassC=(x:number,y:number)=>bypass(x*sub,y*sub)
   // Snapshot the deblocked planes; SAO reads these, writes into the originals.
   if (pic.sh.saoLuma) {
     const srcY = pic.y.slice()
-    applyPlane(srcY, pic.y, pic.width, pic.height, ctbSize, ctbSize, widthInCtbs, heightInCtbs, pic.sao, 0, bitDepth)
+    applyPlane(srcY, pic.y, pic.width, pic.height, ctbSize, ctbSize, widthInCtbs, heightInCtbs, pic.sao, 0, bitDepth, bypass)
   }
   if (pic.sh.saoChroma) {
     const srcCb = pic.cb.slice()
     const srcCr = pic.cr.slice()
-    const cSize = ctbSize >> 1
-    applyPlane(srcCb, pic.cb, cw, ch, cSize, cSize, widthInCtbs, heightInCtbs, pic.sao, 1, bitDepth)
-    applyPlane(srcCr, pic.cr, cw, ch, cSize, cSize, widthInCtbs, heightInCtbs, pic.sao, 2, bitDepth)
+    const cSize = ctbSize / sub
+    applyPlane(srcCb, pic.cb, cw, ch, cSize, cSize, widthInCtbs, heightInCtbs, pic.sao, 1, bitDepth, bypassC)
+    applyPlane(srcCr, pic.cr, cw, ch, cSize, cSize, widthInCtbs, heightInCtbs, pic.sao, 2, bitDepth, bypassC)
   }
 }

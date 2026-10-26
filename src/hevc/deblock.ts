@@ -49,6 +49,7 @@ export function deblockPicture(pic: DecodedPicture, pps: PpsInfo, bitDepth = 8):
   const maxVal = (1 << bitDepth) - 1
 
   const { y, cb, cr, width, height, tuEdgesY, qpMap } = pic
+  const bypass=(x:number,y:number)=>!!pic.bypassMap?.[(y>>2)*(width>>2)+(x>>2)]
   const bwY = width >> 2
   const qw = width >> 3
   const clip = (v: number): number => v < 0 ? 0 : v > maxVal ? maxVal : v
@@ -107,12 +108,14 @@ export function deblockPicture(pic: DecodedPicture, pps: PpsInfo, bitDepth = 8):
         const dEq = dq < ((beta + (beta >> 1)) >> 3) ? 1 : 0
 
         const setP = (k: number, i: number, v: number): void => {
+          if (bypass(vertical?ex-1-i:ex+k,vertical?ey+k:ey-1-i)) return
           if (vertical)
             y[(ey + k) * width + (ex - 1 - i)] = v
           else
             y[(ey - 1 - i) * width + (ex + k)] = v
         }
         const setQ = (k: number, i: number, v: number): void => {
+          if (bypass(vertical?ex+i:ex+k,vertical?ey+k:ey+i)) return
           if (vertical)
             y[(ey + k) * width + (ex + i)] = v
           else
@@ -158,16 +161,19 @@ export function deblockPicture(pic: DecodedPicture, pps: PpsInfo, bitDepth = 8):
     }
   }
 
+  if (cb.length === 0) return
+
   // --- chroma, both passes (bS == 2 only, one weak filter per edge) ---
-  const cw = width >> 1
-  const ch = height >> 1
+  const sub=pic.chromaFormatIdc===3?1:2
+  const cw = width / sub
+  const ch = height / sub
   const cMax = (1 << bitDepth) - 1
   const clipC = (v: number): number => v < 0 ? 0 : v > cMax ? cMax : v
 
   for (let pass = 0; pass < 2; pass++) {
     const vertical = pass === 0
     const plane = [cb, cr]
-    const offsets = [pps.cbQpOffset, pps.crQpOffset]
+    const offsets = [pic.sh.cbQpOffset, pic.sh.crQpOffset]
 
     // Chroma edges lie on the 8-chroma-sample grid (= 16 luma).
     const cxStart = vertical ? 8 : 0
@@ -177,8 +183,8 @@ export function deblockPicture(pic: DecodedPicture, pps: PpsInfo, bitDepth = 8):
 
     for (let cy = cyStart; cy < ch; cy += cyStep) {
       for (let cx = cxStart; cx < cw; cx += cxStep) {
-        const lx = cx << 1
-        const ly = cy << 1
+        const lx = cx * sub
+        const ly = cy * sub
         const edgeBlock = tuEdgesY[(ly >> 2) * bwY + (lx >> 2)]
         if (vertical ? !(edgeBlock & 1) : !(edgeBlock & 2))
           continue
@@ -189,7 +195,7 @@ export function deblockPicture(pic: DecodedPicture, pps: PpsInfo, bitDepth = 8):
 
         for (let c = 0; c < 2; c++) {
           const cPlane = plane[c]
-          const qpC = table8_22(qpAvg + offsets[c])
+          const qpC = pic.chromaFormatIdc===3?qpAvg+offsets[c]:table8_22(qpAvg + offsets[c])
           const tc = TC_TABLE[clip3(0, 53, qpC + 2 + tcOffset)] << shift
           if (tc === 0)
             continue
@@ -205,8 +211,8 @@ export function deblockPicture(pic: DecodedPicture, pps: PpsInfo, bitDepth = 8):
             const q0 = cPlane[iQ0]
             const q1 = cPlane[iQ1]
             const delta = clip3(-tc, tc, (((q0 - p0) * 4) + p1 - q1 + 4) >> 3)
-            cPlane[iP0] = clipC(p0 + delta)
-            cPlane[iQ0] = clipC(q0 - delta)
+            if (!bypass((iP0%cw)*sub,Math.floor(iP0/cw)*sub)) cPlane[iP0] = clipC(p0 + delta)
+            if (!bypass((iQ0%cw)*sub,Math.floor(iQ0/cw)*sub)) cPlane[iQ0] = clipC(q0 - delta)
           }
         }
       }

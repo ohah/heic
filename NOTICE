@@ -3,3 +3,12 @@ licensed under MIT.
 Source: https://github.com/stacksjs/ts-heic
 Revision: 35efa13e108ef81a73c0237df1ec28fa20a2cfa1
 The original copyright and permission notice are retained in LICENSE.
+
+HDR gain-map/metadata interpretation was informed by Heifer (MIT option),
+Copyright (c) 2026 heifer contributors.
+Source: https://github.com/HarpeLm/Heifer
+The MIT copyright and permission notice are retained in LICENSE.
+Decoder syntax/scaling were checked against ITU-T H.265 (01/2026);
+HDR transfer functions against ITU-R BT.2100-3 (02/2025), and
+Apple's published "Applying Apple HDR effect to your photos" procedure.
+No libheif/libde265/GPL/LGPL codec code or binaries are included.

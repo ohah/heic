@@ -1,3 +1,4 @@
+import { HeicError } from '../errors.js'
 /**
  * Slice segment header parsing (7.3.6.1) for intra still images, including
  * the WPP/tile entry points iPhone captures rely on.
@@ -129,7 +130,7 @@ export function parseSliceHeader(nal: Uint8Array, sps: SpsInfo, pps: PpsInfo): S
 
     sliceType = r.ue()
     if (sliceType !== SLICE_TYPE_I)
-      throw new Error(`heic: only intra (I) slices are supported, got slice_type ${sliceType}`)
+      throw new HeicError('UNSUPPORTED_FEATURE', `heic: only intra (I) slices are supported, got slice_type ${sliceType}`)
 
     if (pps.outputFlagPresent)
       r.readBit() // pic_output_flag
@@ -137,23 +138,25 @@ export function parseSliceHeader(nal: Uint8Array, sps: SpsInfo, pps: PpsInfo): S
     if (!isIdr(nalType)) {
       // CRA still images: POC + (empty) reference picture set machinery.
       r.readBits(sps.log2MaxPicOrderCntLsb) // slice_pic_order_cnt_lsb
-      let useSpsSet = false
-      if (sps.numShortTermRefPicSets > 0)
-        useSpsSet = r.readBit() === 1 // short_term_ref_pic_set_sps_flag
-      if (!useSpsSet) {
-        const numDeltaPocs: number[] = []
-        skipShortTermRefPicSet(r, sps.numShortTermRefPicSets, sps.numShortTermRefPicSets, numDeltaPocs)
+      const useSpsSet = r.readBit() === 1 // H.265 7.3.6.1: present even with no SPS RPS.
+      if (!useSpsSet) skipShortTermRefPicSet(r,sps.numShortTermRefPicSets,sps.numShortTermRefPicSets,[...sps.numDeltaPocs])
+      else if(sps.numShortTermRefPicSets>1) r.readBits(Math.ceil(Math.log2(sps.numShortTermRefPicSets)))
+      if(sps.longTermRefPicsPresent){
+        const fromSps=sps.numLongTermRefPicsSps?r.ue():0,fromSlice=r.ue()
+        if(fromSps>sps.numLongTermRefPicsSps||fromSps+fromSlice>32)throw new HeicError('INVALID_BITSTREAM','heic: invalid long-term reference count')
+        for(let i=0;i<fromSps+fromSlice;i++){
+          if(i<fromSps){if(sps.numLongTermRefPicsSps>1)r.readBits(Math.ceil(Math.log2(sps.numLongTermRefPicsSps)))}
+          else{r.readBits(sps.log2MaxPicOrderCntLsb);r.readBit()}
+          if(r.readBit())r.ue()
+        }
       }
-      else {
-        r.readBits(Math.ceil(Math.log2(sps.numShortTermRefPicSets)))
-      }
-      // long-term / temporal MVP syntax would follow for real video; a still
-      // image profile bitstream never sets those SPS flags.
+      if(sps.temporalMvpEnabled)r.readBit()
+
     }
 
     if (sps.sampleAdaptiveOffsetEnabled) {
       saoLuma = r.readBit() === 1
-      saoChroma = r.readBit() === 1
+      if (sps.chromaFormatIdc !== 0) saoChroma = r.readBit() === 1
     }
 
     sliceQpY = pps.initQp + r.se()
@@ -195,7 +198,7 @@ export function parseSliceHeader(nal: Uint8Array, sps: SpsInfo, pps: PpsInfo): S
 
   // byte_alignment(): a '1' bit then zeros to the next byte boundary.
   if (r.readBit() !== 1)
-    throw new Error('heic: slice header byte alignment bit missing')
+    throw new HeicError('INVALID_BITSTREAM', 'heic: slice header byte alignment bit missing')
   while (r.bitPosition % 8 !== 0)
     r.readBit()
 

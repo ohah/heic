@@ -1,3 +1,4 @@
+import { HeicError } from '../errors.js'
 /**
  * HEVC (H.265) NAL unit handling: splitting item payloads, unescaping RBSP,
  * and reading NAL headers. This layer is complete; the slice decoder that
@@ -34,19 +35,23 @@ export function isSliceNal(type: number): boolean {
  * prefix size from `hvcC.nalLengthSize`) into NAL units.
  */
 export function splitLengthPrefixed(payload: Uint8Array, nalLengthSize: number): NalUnit[] {
+  if (!Number.isInteger(nalLengthSize) || nalLengthSize < 1 || nalLengthSize > 4) throw new HeicError('INVALID_BITSTREAM', "heic: invalid NAL length prefix size")
   const nals: NalUnit[] = []
   let p = 0
   while (p + nalLengthSize <= payload.length) {
     let len = 0
     for (let i = 0; i < nalLengthSize; i++)
-      len = (len << 8) | payload[p + i]
+      len = len * 256 + payload[p + i]
     p += nalLengthSize
-    if (len <= 0 || p + len > payload.length)
-      break
+    if (len < 2 || p + len > payload.length)
+      throw new HeicError('INVALID_BITSTREAM', "heic: truncated or invalid length-prefixed NAL")
     const data = payload.subarray(p, p + len)
+    if((data[0]&128)||!(data[1]&7))throw new HeicError('INVALID_BITSTREAM','heic: invalid NAL header')
+    if((data[0]&1)||(data[1]>>3))throw new HeicError('UNSUPPORTED_FEATURE','heic: multilayer HEVC NAL units are not supported')
     nals.push({ type: (data[0] >> 1) & 0x3F, data })
     p += len
   }
+  if (p !== payload.length) throw new HeicError('INVALID_BITSTREAM', "heic: truncated NAL length prefix")
   return nals
 }
 
@@ -108,7 +113,7 @@ export class BitReader {
   constructor(private data: Uint8Array) {}
 
   readBit(): number {
-    if (this.pos >= this.data.length * 8) throw new Error("heic: truncated bitstream")
+    if (this.pos >= this.data.length * 8) throw new HeicError('INVALID_BITSTREAM', "heic: truncated bitstream")
     const byte = this.data[this.pos >> 3]
     const bit = (byte >> (7 - (this.pos & 7))) & 1
     this.pos++
@@ -126,7 +131,7 @@ export class BitReader {
   ue(): number {
     let zeros = 0
     while (this.readBit() === 0 && zeros < 32) zeros++
-    if (zeros > 30) throw new Error("heic: Exp-Golomb value exceeds supported range")
+    if (zeros > 30) throw new HeicError('INVALID_BITSTREAM', "heic: Exp-Golomb value exceeds supported range")
     let v = (1 << zeros) - 1
     if (zeros > 0)
       v += this.readBits(zeros)

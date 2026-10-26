@@ -1,3 +1,4 @@
+import { HeicError } from '../errors.js'
 /**
  * HEVC picture parameter set parsing — every field an intra still-image
  * decoder needs, including tile layout, WPP, cu_qp_delta, and deblocking
@@ -113,7 +114,7 @@ export function parsePps(nal: Uint8Array): PpsInfo {
   const listsModificationPresent = r.readBit() === 1
   const log2ParallelMergeLevel = r.ue() + 2
   const sliceSegmentHeaderExtensionPresent = r.readBit() === 1
-  if (r.readBit()) throw new Error('heic: PPS extensions are not supported')
+  if (r.readBit()) throw new HeicError('UNSUPPORTED_FEATURE', 'heic: PPS extensions are not supported')
 
   return {
     ppsId,

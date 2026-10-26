@@ -1,3 +1,4 @@
+import { HeicError } from '../errors.js'
 /**
  * HEVC sequence parameter set parsing — the full SPS as far as the VUI colour
  * description, cross-checkable against the HEIF container's `ispe` values and
@@ -18,6 +19,8 @@ export interface VuiColorInfo {
 export interface SpsInfo {
   spsId: number
   chromaFormatIdc: number
+  separateColourPlane: boolean
+  rangeFlags: number
   /** Final display width/height after the conformance window crop. */
   width: number
   height: number
@@ -49,6 +52,10 @@ export interface SpsInfo {
   pcmLoopFilterDisabled: boolean
   strongIntraSmoothingEnabled: boolean
   numShortTermRefPicSets: number
+  numDeltaPocs: number[]
+  longTermRefPicsPresent: boolean
+  numLongTermRefPicsSps: number
+  temporalMvpEnabled: boolean
   /** From the VUI video_signal_type, if present. */
   color: VuiColorInfo | null
 }
@@ -132,8 +139,7 @@ export function parseSps(nal: Uint8Array): SpsInfo {
 
   const spsId = r.ue()
   const chromaFormatIdc = r.ue()
-  if (chromaFormatIdc === 3)
-    r.readBit() // separate_colour_plane_flag
+  const separateColourPlane = chromaFormatIdc === 3 && r.readBit() === 1
 
   const picWidthInLumaSamples = r.ue()
   const picHeightInLumaSamples = r.ue()
@@ -197,15 +203,17 @@ const numDeltaPocs: number[] = []
 for (let i = 0; i < numShortTermRefPicSets; i++)
   skipShortTermRefPicSet(r, i, numShortTermRefPicSets, numDeltaPocs)
 
-if (r.readBit() === 1) { // long_term_ref_pics_present_flag
-const numLongTerm = r.ue()
-for (let i = 0; i < numLongTerm; i++) {
+const longTermRefPicsPresent = r.readBit() === 1
+let numLongTermRefPicsSps = 0
+if (longTermRefPicsPresent) {
+numLongTermRefPicsSps = r.ue()
+for (let i = 0; i < numLongTermRefPicsSps; i++) {
   r.readBits(log2MaxPicOrderCntLsb) // lt_ref_pic_poc_lsb_sps
   r.readBit() // used_by_curr_pic_lt_sps_flag
 }
 }
 
-r.readBit() // sps_temporal_mvp_enabled_flag
+const temporalMvpEnabled = r.readBit() === 1
 const strongIntraSmoothingEnabled = r.readBit() === 1
 
 let color: VuiColorInfo | null = null
@@ -240,7 +248,7 @@ if (r.readBit()) { r.ue(); r.ue(); r.ue(); r.ue() } // default display window
 if (r.readBit()) {
   r.readBits(32); r.readBits(32)
   if (r.readBit()) r.ue()
-  if (r.readBit()) throw new Error('heic: HRD timing parameters are not supported')
+  if (r.readBit()) throw new HeicError('UNSUPPORTED_FEATURE', 'heic: HRD timing parameters are not supported')
 }
 if (r.readBit()) {
   r.readBit(); r.readBit(); r.readBit()
@@ -248,10 +256,11 @@ if (r.readBit()) {
 }
 }
 
+let rangeFlags=0
 if (r.readBit()) { // sps_extension_present_flag
   const range = r.readBit()
-  if (r.readBits(7)) throw new Error('heic: unsupported SPS extension')
-  if (range && r.readBits(9)) throw new Error('heic: range-extension coding tools are not supported')
+  if (r.readBits(7)) throw new HeicError('UNSUPPORTED_FEATURE', 'heic: unsupported SPS extension')
+  if (range) rangeFlags=r.readBits(9)
 }
 
 // SubWidthC/SubHeightC per chroma_format_idc (4:2:0 = 2/2, 4:2:2 = 2/1).
@@ -264,6 +273,7 @@ const height = picHeightInLumaSamples - subH * (cropTop + cropBottom)
 return {
   spsId,
   chromaFormatIdc,
+  separateColourPlane, rangeFlags,
   width,
   height,
   picWidthInLumaSamples,
@@ -292,6 +302,7 @@ return {
   pcmLoopFilterDisabled,
   strongIntraSmoothingEnabled,
   numShortTermRefPicSets,
+  numDeltaPocs, longTermRefPicsPresent, numLongTermRefPicsSps, temporalMvpEnabled,
   color,
 }
 }

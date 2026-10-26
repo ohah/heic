@@ -2,7 +2,7 @@
 
 Pure TypeScript HEIC/HEIF still-image decoding. MIT. No WebAssembly, native modules, runtime dependencies, libheif, or libde265.
 
-**Early implementation, not a drop-in replacement for every HEIC decoder.** Based on the MIT-licensed [ts-heic](https://github.com/stacksjs/ts-heic) implementation; see [NOTICE](NOTICE). This project adds 10/12-bit 4:2:0 reconstruction, resource limits, and a browser worker API. It is not published to npm yet.
+**Early implementation, not a drop-in replacement for every HEIC decoder.** Based on the MIT-licensed [ts-heic](https://github.com/stacksjs/ts-heic) implementation; see [NOTICE](NOTICE). This project adds 8/10/12-bit monochrome, 4:2:0 and 4:4:4 reconstruction, auxiliary alpha, HDR reconstruction, resource limits, and a browser worker API. It is not published to npm yet.
 
 ## Usage
 
@@ -44,38 +44,50 @@ Each worker request owns a dedicated worker, terminated on success, error, cance
 
 Input limit: 64 MiB. Output/padded-grid limit: 50 million pixels, lowerable through `maxPixels`. Decoding has additional memory overhead; these limits do not guarantee a device has sufficient memory.
 
-## Supported scope
+## HDR and alpha
 
-- HEVC intra-coded still pictures, 4:2:0, matching 8/10/12-bit luma and chroma.
-- Single images and tiled HEIF grids, conformance crop, rotation and mirroring.
-- Scaling lists, WPP, quantization-group QP changes, deblocking and SAO.
-- BT.601/BT.709 conversion and full/limited range to RGBA8.
+```ts
+import { decodeHDR, decodeHDRSync, HeicError } from '@ohah/heic'
+const hdr = await decodeHDR(file, { execution: 'worker' })
+// Float32Array RGBA, linear-sRGB. RGB may exceed 1 or be negative after gamut conversion.
+// Alpha remains 0..1. Default: full stored gain-map headroom.
+const previewTarget = decodeHDRSync(input, { displayHeadroom: 4 })
+```
 
-Unsupported: 4:2:2/4:4:4, inter pictures/animation, alpha-plane reconstruction, PCM, transquant bypass, PPS extensions and active SPS range-extension coding tools. VUI HRD timing is rejected. ICC profiles, HDR gain maps, wide-gamut color management and HDR tone mapping are not implemented. Do not interpret RGBA8 output as a color-managed/HDR rendering.
+PQ/HLG reconstruction follows BT.2100. PQ reference white defaults to 203 nits; HLG display peak defaults to 1000 nits. Apple gain maps and ISO version-0 gain maps are reconstructed in linear light. Matrix/TRC RGB ICC profiles and supported CICP metadata are applied by the HDR API. LUT ICC profiles are rejected. `decodeHeic`/`decode` return RGBA8, without HDR tone mapping or general ICC color management. Use `decodeHDR` for explicit linear color processing.
+
+Auxiliary alpha is resolved from `auxl` references and `auxC` descriptors. Premultiplied sources are converted to straight alpha. The browser demo shows alpha over a checkerboard and offers an explicitly labeled SDR Reinhard preview of HDR data; it does not validate physical HDR display output.
+
+## Supported scope and remaining work
+
+- Intra-coded HEVC still images: monochrome, 4:2:0 and 4:4:4, 8/10/12-bit. Color planes must have matching depth.
+- HEIF image grids, identity/overlay images, integer clean aperture, rotation and mirroring.
+- Scaling lists, WPP, transform skip, transquant bypass, QP changes, deblocking and SAO.
+- BT.601/709/2020 YUV matrices, identity matrix and full/limited range.
+- Auxiliary alpha and the HDR paths described above.
+
+**Not full HEIF/HEVC conformance.** Remaining unsupported features include 4:2:2, separate color planes, multilayer HEVC, inter prediction/timed sequences, multi-slice images, HEVC internal tiles, PCM, PPS extensions, most active range-extension tools, fractional clean aperture, SlimHEIF `mini` containers, and older gain-map metadata versions. Unknown essential properties and required decoding features are rejected. The external corpus still contains valid HEVC files requiring these features; a rejection is not counted as a successful decode.
+
+Stable decoder failures use `HeicError.code` (for example `INVALID_CONTAINER`, `INVALID_BITSTREAM`, `UNSUPPORTED_FEATURE`, `RESOURCE_LIMIT`, `WORKER_FAILED`, `TIMEOUT`). Cancellation preserves `AbortSignal.reason`, including falsy values, instead of wrapping it as a decoding error.
 
 ## Validation
 
+See [the validation record](docs/VALIDATION.md) for exact coverage, remaining failures, source versions and independent reference differences.
+
 ```sh
-bun test             # 63 tests; inherited regressions + six reference vectors
+bun test
 bun run typecheck
 bun run build
-node e2e/browser.mjs  # requires agent-browser/Chromium; 20 adversarial cases
+E2E_ROUNDS=20 node e2e/browser.mjs
+bun scripts/corpus.ts
+bun scripts/reference-corpus.ts
+HEIC_CHROMA=1 bun scripts/adversarial-reference.ts
+HEIC_CHROMA=3 bun scripts/adversarial-reference.ts
 ```
 
-- Existing 8-bit iPhone single-image/grid captures: decoder regressions and browser main/worker pixel equality.
-- **Synthetic** 8/10/12-bit pattern and gradient vectors: all reconstructed Y/Cb/Cr samples equal FFmpeg reference output. This is not a claim of full HEVC conformance or real-device 10/12-bit coverage.
-- Browser cases: thread equality, sliced input views, concurrent workers, pre/in-flight aborts, timeout, missing worker, invalid/truncated files, resource limits and recovery.
-- Browser screenshots/results go to `/tmp/ohah-heic-browser`, never into Git.
+External fixtures are downloaded to `/tmp/heic-external-corpus`, checked against the SHA256 manifest, and never shipped in the npm package. Browser screenshots/results are saved under `/tmp`, never committed. FFmpeg/libx265 are optional development reference tools, not runtime dependencies. `ts-jpeg` is a development-only decoder for the inherited JPEG-reference test.
 
-Regenerate the small synthetic reference vectors with:
-
-```sh
-bun scripts/generate-conformance.ts /tmp/heic-conformance
-```
-
-FFmpeg/libx265 are optional **development-only** reference tools. They are not shipped in this library or needed to decode files. The generator intentionally creates only 4:2:0 intra test vectors.
-
-For the browser demo, run `bun run build`, serve this directory over HTTP, and open `/demo/index.html`. All conversion stays local.
+For the browser demo, build, serve this directory over HTTP, and open `/demo/index.html`. Conversion stays local.
 
 ## License
 

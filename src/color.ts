@@ -46,8 +46,8 @@ export function yuv420ToRgba(
   const fullRange = options.fullRange ?? true
 
   // Kr/Kb per matrix: BT.709 = 0.2126/0.0722, BT.601 = 0.299/0.114.
-  const kr = matrix === 1 ? 0.2126 : 0.299
-  const kb = matrix === 1 ? 0.0722 : 0.114
+  const kr = matrix === 1 ? 0.2126 : matrix === 9 ? 0.2627 : 0.299
+  const kb = matrix === 1 ? 0.0722 : matrix === 9 ? 0.0593 : 0.114
   const crR = 2 * (1 - kr)
   const cbB = 2 * (1 - kb)
   const crG = (2 * kr * (1 - kr)) / (1 - kr - kb)
