@@ -4,7 +4,9 @@ Source: https://github.com/stacksjs/ts-heic
 Revision: 35efa13e108ef81a73c0237df1ec28fa20a2cfa1
 The original copyright and permission notice are retained in LICENSE.
 
-HDR gain-map/metadata interpretation was informed by Heifer (MIT option),
+The Apple EXIF MakerNote/headroom interpretation in src/hdr.ts (appleHeadroom),
+and the gain-map metadata/sampling implementation were informed by the
+Heifer HDR/EXIF implementation (MIT option),
 Copyright (c) 2026 heifer contributors.
 Source: https://github.com/HarpeLm/Heifer
 The MIT copyright and permission notice are retained in LICENSE.
