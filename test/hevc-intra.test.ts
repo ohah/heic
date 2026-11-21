@@ -127,6 +127,24 @@ describe('intra prediction modes', () => {
     expect(out[1]).toBe(100 + ((60 - 90) >> 1));
   });
 
+  it('disables luma intra boundary filtering when requested', () => {
+    const refs = refsFrom(
+      90,
+      [100, 110, 120, 130, 140, 150, 160, 170],
+      [50, 60, 70, 80, 90, 95, 96, 97],
+    );
+    const dc = predictIntra(refs, 4, INTRA_DC, 0, 8, true);
+    expect(new Set(dc).size).toBe(1);
+
+    const vertical = predictIntra(refs, 4, 26, 0, 8, true);
+    expect(vertical[0]).toBe(50);
+    expect(vertical[4]).toBe(50);
+
+    const horizontal = predictIntra(refs, 4, 10, 0, 8, true);
+    expect(horizontal[0]).toBe(100);
+    expect(horizontal[1]).toBe(100);
+  });
+
   it('mode 2 (diagonal from bottom-left): pred[x][y] = p[-1][x+y+1]', () => {
     const left = [10, 20, 30, 40, 50, 60, 70, 80];
     const top = Array.from({ length: 8 }, () => 0);

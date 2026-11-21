@@ -1,7 +1,9 @@
 // Small standards-shaped containers for codec/derived-image regression tests.
 import { readFileSync } from 'node:fs';
 import { parseISOBMFF, findBox } from '../../src/container/heif';
-import { getHeicInfo, getItemPayload } from '../../src/container/heic';
+import { getItemPayload, parseHvcC, parsePitm } from '../../src/container/heic';
+import { toRbsp } from '../../src/hevc/nal';
+import { parseSps } from '../../src/hevc/sps';
 export const u16 = (n: number) => {
   const b = Buffer.alloc(2);
   b.writeUInt16BE(n);
@@ -23,37 +25,105 @@ export interface Item {
   type: string;
   data: Uint8Array;
   properties: Uint8Array[];
+  /** Zero-based indexes into `properties` associated with this item. */
+  propertyAssociationIndexes?: readonly number[];
+  dataReference?: Uint8Array;
+  /** `iloc` offset used when `dataReference` points to an external `url ` entry. */
+  externalDataOffset?: number;
   refs?: { type: string; to: number[] }[];
 }
-export function codedFixture(depth = 8): Item {
+export function codedFixture(depth = 8, pattern = 'pattern'): Item {
   const input = new Uint8Array(
-      readFileSync(new URL(`../fixtures/conformance/pattern-${depth}.heic`, import.meta.url)),
+      readFileSync(new URL(`../fixtures/conformance/${pattern}-${depth}.heic`, import.meta.url)),
     ),
     boxes = parseISOBMFF(input),
-    m = getHeicInfo(input, boxes),
     meta = findBox(boxes, 'meta')!,
     iprp = findBox(meta.children!, 'iprp')!,
-    props = findBox(iprp.children!, 'ipco')!.children!;
+    props = findBox(iprp.children!, 'ipco')!.children!,
+    primaryItemId = parsePitm(findBox(meta.children!, 'pitm')!.data),
+    data = getItemPayload(input, boxes, primaryItemId)!;
   return {
-    id: 1,
+    id: primaryItemId,
     type: 'hvc1',
-    data: getItemPayload(input, boxes, m.primaryItemId)!,
-    properties: props.map((p) => box(p.type, p.data)),
+    data,
+    properties: props.map((p) => {
+      if (p.type !== 'hvcC') return box(p.type, p.data);
+      // The tiny pattern fixtures predate hvcC/pixi depth cross-checking and
+      // carry placeholder configuration bytes. Repair their record from SPS.
+      const configuration = Buffer.from(p.data),
+        hvcC = parseHvcC(p.data),
+        sps = hvcC.sps[0],
+        parsedSps = parseSps(sps),
+        rbsp = toRbsp(sps);
+      configuration.set(rbsp.subarray(1, 13), 1);
+      configuration[16] = (configuration[16] & 0xfc) | parsedSps.chromaFormatIdc;
+      configuration[17] = (configuration[17] & 0xf8) | (parsedSps.bitDepthLuma - 8);
+      configuration[18] = (configuration[18] & 0xf8) | (parsedSps.bitDepthChroma - 8);
+      configuration[21] = ((((rbsp[0] >> 1) & 7) + 1) << 3) | ((rbsp[0] & 1) << 2) | 3;
+      return box('hvcC', configuration);
+    }),
   };
 }
-export function buildHeif(items: Item[], primary: number): Uint8Array {
-  const ftyp = box('ftyp', Buffer.from('heic'), u32(0), Buffer.from('heicmif1'));
+export function buildHeif(
+  items: Item[],
+  primary: number,
+  entityGroups: Uint8Array[] = [],
+): Uint8Array {
+  const hasUncompressedItem = items.some((item) => item.type === 'unci');
+  const needsExtendedBrand = items.some((item) => {
+    const hvcCProperty = item.properties.find(
+      (property) => property.length >= 8 && property.toString('ascii', 4, 8) === 'hvcC',
+    );
+    if (!hvcCProperty) return false;
+    const config = parseHvcC(hvcCProperty.subarray(8));
+    return (
+      config.chromaFormatIdc !== 1 ||
+      config.bitDepthLumaMinus8 !== 0 ||
+      config.bitDepthChromaMinus8 !== 0 ||
+      ![1, 3].includes(config.generalProfileIdc)
+    );
+  });
+  const brand = hasUncompressedItem ? 'mif1' : needsExtendedBrand ? 'heix' : 'heic';
+  const ftyp = box('ftyp', Buffer.from(brand), u32(0), Buffer.from(brand + 'mif1'));
   const properties = items.flatMap((i) => i.properties),
     associations: Uint8Array[] = [];
+  const useWideAssociations = properties.length > 0x7f;
+  if (useWideAssociations && properties.length > 0x7fff)
+    throw new Error('buildHeif property association index exceeds the 15-bit limit');
   let propertyIndex = 1;
   for (const item of items) {
-    const indexes = item.properties.map(() => 0x80 | propertyIndex++);
-    associations.push(Buffer.concat([u16(item.id), Buffer.from([indexes.length, ...indexes])]));
+    const firstPropertyIndex = propertyIndex;
+    propertyIndex += item.properties.length;
+    const localIndexes =
+      item.propertyAssociationIndexes ?? item.properties.map((_, index) => index);
+    if (
+      localIndexes.some(
+        (index) => !Number.isInteger(index) || index < 0 || index >= item.properties.length,
+      )
+    )
+      throw new Error('buildHeif property association index is out of range');
+    if (localIndexes.length > 0xff)
+      throw new Error('buildHeif property association count exceeds the 8-bit limit');
+    const indexes = localIndexes.map((index) => firstPropertyIndex + index);
+    associations.push(
+      Buffer.concat([
+        useWideAssociations ? u32(item.id) : u16(item.id),
+        Buffer.from([indexes.length]),
+        ...indexes.map((index) =>
+          useWideAssociations ? u16(0x8000 | index) : Buffer.from([0x80 | index]),
+        ),
+      ]),
+    );
   }
   const iprp = box(
     'iprp',
     box('ipco', ...properties),
-    full('ipma', 0, u32(items.length), ...associations),
+    box(
+      'ipma',
+      Buffer.from([useWideAssociations ? 1 : 0, 0, 0, useWideAssociations ? 1 : 0]),
+      u32(items.length),
+      ...associations,
+    ),
   );
   const iinf = full(
     'iinf',
@@ -72,6 +142,15 @@ export function buildHeif(items: Item[], primary: number): Uint8Array {
       ),
     ),
   );
+  const dataReferences = [
+    ...new Set(items.flatMap((item) => (item.dataReference ? [item.dataReference] : []))),
+  ];
+  const dataReferenceIndexes = new Map(
+    dataReferences.map((reference, index) => [reference, index + 1]),
+  );
+  const dinf = dataReferences.length
+    ? box('dinf', full('dref', 0, u32(dataReferences.length), ...dataReferences))
+    : null;
   const meta = (start: number) => {
     let offset = start;
     return full(
@@ -86,11 +165,15 @@ export function buildHeif(items: Item[], primary: number): Uint8Array {
         Buffer.from([0x44, 0]),
         u16(items.length),
         ...items.map((item) => {
+          const externalReference =
+            item.dataReference !== undefined &&
+            item.dataReference.length >= 8 &&
+            ['url ', 'urn '].includes(String.fromCharCode(...item.dataReference.subarray(4, 8)));
           const entry = Buffer.concat([
             u16(item.id),
-            u16(0),
+            u16(item.dataReference ? dataReferenceIndexes.get(item.dataReference)! : 0),
             u16(1),
-            u32(offset),
+            u32(externalReference ? (item.externalDataOffset ?? 0) : offset),
             u32(item.data.length),
           ]);
           offset += item.data.length;
@@ -98,7 +181,9 @@ export function buildHeif(items: Item[], primary: number): Uint8Array {
         }),
       ),
       iprp,
+      ...(dinf ? [dinf] : []),
       iref,
+      ...(entityGroups.length > 0 ? [box('grpl', ...entityGroups)] : []),
     );
   };
   return Buffer.concat([
@@ -120,13 +205,13 @@ export function isoMetadata(multichannel = false): Uint8Array {
     ),
   ]);
 }
-export function isoFixture(depth = 8): Uint8Array {
+export function isoFixture(depth = 8, metadata = isoMetadata()): Uint8Array {
   const base = codedFixture(depth),
     gain = { ...codedFixture(depth), id: 2 },
     tmap: Item = {
       id: 3,
       type: 'tmap',
-      data: isoMetadata(),
+      data: metadata,
       properties: [full('ispe', 0, u32(64), u32(64)), nclx()],
       refs: [{ type: 'dimg', to: [1, 2] }],
     };

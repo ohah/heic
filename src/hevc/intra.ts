@@ -156,6 +156,7 @@ export function predictIntra(
   mode: number,
   cIdx: number,
   bitDepth: number,
+  disableIntraBoundaryFilter = false,
 ): Int32Array {
   const out = new Int32Array(size * size);
   const { left, top, corner } = refs;
@@ -186,7 +187,7 @@ export function predictIntra(
     for (let i = 0; i < size; i++) sum += top[i] + left[i];
     const dc = sum >> (log2 + 1);
     out.fill(dc);
-    if (cIdx === 0 && size < 32) {
+    if (cIdx === 0 && size < 32 && !disableIntraBoundaryFilter) {
       out[0] = (left[0] + 2 * dc + top[0] + 2) >> 2;
       for (let x = 1; x < size; x++) out[x] = (top[x] + 3 * dc + 2) >> 2;
       for (let y = 1; y < size; y++) out[y * size] = (left[y] + 3 * dc + 2) >> 2;
@@ -232,7 +233,7 @@ export function predictIntra(
     }
   }
 
-  if (cIdx === 0 && size < 32) {
+  if (cIdx === 0 && size < 32 && !disableIntraBoundaryFilter) {
     if (mode === INTRA_ANGULAR_VER) {
       for (let y = 0; y < size; y++) out[y * size] = clip(top[0] + ((left[y] - corner) >> 1));
     } else if (mode === INTRA_ANGULAR_HOR) {

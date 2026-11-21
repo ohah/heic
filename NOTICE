@@ -10,6 +10,11 @@ Heifer HDR/EXIF implementation (MIT option),
 Copyright (c) 2026 heifer contributors.
 Source: https://github.com/HarpeLm/Heifer
 The MIT copyright and permission notice are retained in LICENSE.
+
+The AVC WebAssembly decoder under vendor/hibernia is generated from Hibernia
+by Eugene Zemtsov (MIT), at revision
+0687cce7095998862d53b526ad2c41da43b90add. Its plane-copy accessors were added
+to the WebAssembly binding. The license is retained in vendor/hibernia/LICENSE.
 Decoder syntax/scaling were checked against ITU-T H.265 (01/2026);
 HDR transfer functions against ITU-R BT.2100-3 (02/2025), and
 Apple's published "Applying Apple HDR effect to your photos" procedure.

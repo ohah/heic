@@ -25,9 +25,12 @@ const metadata = JSON.parse(await readFile(join(packageDir, 'package.json'), 'ut
 assert.ok(!Object.keys(metadata.dependencies ?? {}).length, 'unexpected runtime dependency');
 const module = await import(pathToFileURL(join(packageDir, 'dist/index.js')));
 const input = new Uint8Array(
-  await readFile(join(root, 'test/fixtures/conformance/pattern-12.heic')),
+  await readFile(join(root, 'test/fixtures/conformance/chroma422-8.heic')),
 );
-assert.equal(module.decodeHeic(input).bitDepth, 12);
+const avcInput = new Uint8Array(await readFile(join(root, 'test/fixtures/avc/mini-16x16.heic')));
+assert.equal(module.decodeHeic(input).bitDepth, 8);
+const avcImage = await module.decode(avcInput, { execution: 'main' });
+assert.deepEqual([avcImage.width, avcImage.height, avcImage.bitDepth], [16, 16, 8]);
 const { rspack } = await import(
   process.env.RSPACK_MODULE ? pathToFileURL(process.env.RSPACK_MODULE).href : '@rspack/core'
 );
@@ -61,6 +64,10 @@ const server = createServer(async (req, res) => {
       res.end(input);
       return;
     }
+    if (req.url === '/avc.heic') {
+      res.end(avcInput);
+      return;
+    }
     const path = resolvePath(output, 'bundle', '.' + (req.url === '/' ? '/index.html' : req.url));
     if (!path.startsWith(join(output, 'bundle') + sep)) {
       res.writeHead(403);
@@ -68,7 +75,14 @@ const server = createServer(async (req, res) => {
       return;
     }
     const content = await readFile(path);
-    res.setHeader('content-type', extname(path) === '.js' ? 'text/javascript' : 'text/html');
+    res.setHeader(
+      'content-type',
+      extname(path) === '.js'
+        ? 'text/javascript'
+        : extname(path) === '.wasm'
+          ? 'application/wasm'
+          : 'text/html',
+    );
     res.end(content);
   } catch {
     res.writeHead(404);
@@ -85,9 +99,17 @@ const ab = async (...args) =>
 try {
   await ab('open', `http://localhost:${server.address().port}/`);
   await ab('wait', '--fn', '!!window.decodeHeicPackage');
-  const code = `(async()=>{const input=new Uint8Array(await(await fetch('/sample.heic')).arrayBuffer());const main=await window.decodeHeicPackage(input,{execution:'main'});const worker=await window.decodeHeicPackage(input);if(main.data.some((v,i)=>v!==worker.data[i]))throw Error('Pixels differ');try{await window.decodeHeicPackage(new Uint8Array([1]))}catch(e){return {width:worker.width,height:worker.height,bitDepth:worker.bitDepth,error:e.code}}throw Error('Invalid input accepted')})()`;
+  const code = `(async()=>{const input=new Uint8Array(await(await fetch('/sample.heic')).arrayBuffer());const main=await window.decodeHeicPackage(input,{execution:'main'});const worker=await window.decodeHeicPackage(input);if(main.data.some((v,i)=>v!==worker.data[i]))throw Error('HEVC pixels differ');const avcInput=new Uint8Array(await(await fetch('/avc.heic')).arrayBuffer());const avcMain=await window.decodeHeicPackage(avcInput,{execution:'main'});const avcWorker=await window.decodeHeicPackage(avcInput);if(avcMain.data.some((v,i)=>v!==avcWorker.data[i]))throw Error('AVC pixels differ');try{await window.decodeHeicPackage(new Uint8Array([1]))}catch(e){return {width:worker.width,height:worker.height,bitDepth:worker.bitDepth,avcWidth:avcWorker.width,avcHeight:avcWorker.height,avcBitDepth:avcWorker.bitDepth,error:e.code}}throw Error('Invalid input accepted')})()`;
   const result = JSON.parse(await ab('eval', '-b', Buffer.from(code).toString('base64')));
-  assert.deepEqual(result, { width: 64, height: 64, bitDepth: 12, error: 'UNSUPPORTED_FORMAT' });
+  assert.deepEqual(result, {
+    width: 64,
+    height: 64,
+    bitDepth: 8,
+    avcWidth: 16,
+    avcHeight: 16,
+    avcBitDepth: 8,
+    error: 'UNSUPPORTED_FORMAT',
+  });
   await writeFile(
     join(output, 'results.json'),
     JSON.stringify(
