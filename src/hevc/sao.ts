@@ -8,6 +8,8 @@
  */
 import type { DecodedPicture, SaoParams } from './picture.js';
 import type { SpsInfo } from './sps.js';
+import type { SliceHeader } from './slice-header.js';
+import { chromaSubsampling } from './chroma.js';
 
 function sign(v: number): number {
   return v > 0 ? 1 : v < 0 ? -1 : 0;
@@ -31,6 +33,13 @@ function applyPlane(
   widthInCtbs: number,
   heightInCtbs: number,
   sao: SaoParams[],
+  sliceIdByCtb: Uint32Array,
+  tileIdByCtb: Uint32Array,
+  sliceHeaders: SliceHeader[],
+  loopFilterAcrossTilesEnabled: boolean,
+  log2CtbSize: number,
+  subWidth: number,
+  subHeight: number,
   cIdx: number,
   bitDepth: number,
   skip: (x: number, y: number) => boolean,
@@ -75,6 +84,31 @@ function applyPlane(
               y1 >= height
             )
               continue;
+            const centerLumaX = cIdx === 0 ? x : x * subWidth;
+            const centerLumaY = cIdx === 0 ? y : y * subHeight;
+            const neighborLumaX0 = cIdx === 0 ? x0 : x0 * subWidth;
+            const neighborLumaY0 = cIdx === 0 ? y0 : y0 * subHeight;
+            const neighborLumaX1 = cIdx === 0 ? x1 : x1 * subWidth;
+            const neighborLumaY1 = cIdx === 0 ? y1 : y1 * subHeight;
+            const currentAddr =
+              (centerLumaY >> log2CtbSize) * widthInCtbs + (centerLumaX >> log2CtbSize);
+            const currentSliceId = sliceIdByCtb[currentAddr];
+            const currentTileId = tileIdByCtb[currentAddr];
+            const canReadNeighbor = (neighborX: number, neighborY: number): boolean => {
+              const neighborAddr =
+                (neighborY >> log2CtbSize) * widthInCtbs + (neighborX >> log2CtbSize);
+              const neighborSliceId = sliceIdByCtb[neighborAddr];
+              if (!loopFilterAcrossTilesEnabled && tileIdByCtb[neighborAddr] !== currentTileId)
+                return false;
+              if (neighborSliceId === currentSliceId) return true;
+              const boundarySliceId = neighborAddr < currentAddr ? currentSliceId : neighborSliceId;
+              return (sliceHeaders[boundarySliceId] ?? sliceHeaders[0]).loopFilterAcrossSlices;
+            };
+            if (
+              !canReadNeighbor(neighborLumaX0, neighborLumaY0) ||
+              !canReadNeighbor(neighborLumaX1, neighborLumaY1)
+            )
+              continue;
             const cur = src[y * width + x];
             const edgeIdx = sign(cur - src[y0 * width + x0]) + sign(cur - src[y1 * width + x1]);
             dst[y * width + x] = clip(cur + table[edgeIdx + 2]);
@@ -98,22 +132,26 @@ function applyPlane(
 }
 
 /** Apply SAO to a decoded picture, in place. */
-export function applySao(pic: DecodedPicture, sps: SpsInfo, bitDepth = 8): void {
+export function applySao(
+  pic: DecodedPicture,
+  sps: SpsInfo,
+  bitDepthLuma = sps.bitDepthLuma,
+  bitDepthChroma = sps.bitDepthChroma,
+): void {
   if (!sps.sampleAdaptiveOffsetEnabled) return;
-  if (!pic.sh.saoLuma && !pic.sh.saoChroma) return;
 
   const ctbSize = 1 << sps.log2CtbSize;
   const widthInCtbs = Math.ceil(pic.width / ctbSize);
   const heightInCtbs = Math.ceil(pic.height / ctbSize);
-  const sub = sps.chromaFormatIdc === 3 ? 1 : 2;
-  const cw = pic.width / sub;
-  const ch = pic.height / sub;
+  const sub = chromaSubsampling(sps.chromaFormatIdc);
+  const cw = Math.ceil(pic.width / sub.width);
+  const ch = Math.ceil(pic.height / sub.height);
 
   const bypass = (x: number, y: number) =>
     !!pic.bypassMap?.[(y >> 2) * (pic.width >> 2) + (x >> 2)];
-  const bypassC = (x: number, y: number) => bypass(x * sub, y * sub);
+  const bypassC = (x: number, y: number) => bypass(x * sub.width, y * sub.height);
   // Snapshot the deblocked planes; SAO reads these, writes into the originals.
-  if (pic.sh.saoLuma) {
+  if (pic.sao.some((params) => params.typeIdx[0] !== 0)) {
     const srcY = pic.y.slice();
     applyPlane(
       srcY,
@@ -125,27 +163,42 @@ export function applySao(pic: DecodedPicture, sps: SpsInfo, bitDepth = 8): void 
       widthInCtbs,
       heightInCtbs,
       pic.sao,
+      pic.sliceIdByCtb,
+      pic.tileIdByCtb,
+      pic.sliceHeaders,
+      pic.loopFilterAcrossTilesEnabled,
+      pic.log2CtbSize,
+      1,
+      1,
       0,
-      bitDepth,
+      bitDepthLuma,
       bypass,
     );
   }
-  if (pic.sh.saoChroma) {
+  if (pic.sao.some((params) => params.typeIdx[1] !== 0 || params.typeIdx[2] !== 0)) {
     const srcCb = pic.cb.slice();
     const srcCr = pic.cr.slice();
-    const cSize = ctbSize / sub;
+    const cSizeW = ctbSize / sub.width;
+    const cSizeH = ctbSize / sub.height;
     applyPlane(
       srcCb,
       pic.cb,
       cw,
       ch,
-      cSize,
-      cSize,
+      cSizeW,
+      cSizeH,
       widthInCtbs,
       heightInCtbs,
       pic.sao,
+      pic.sliceIdByCtb,
+      pic.tileIdByCtb,
+      pic.sliceHeaders,
+      pic.loopFilterAcrossTilesEnabled,
+      pic.log2CtbSize,
+      sub.width,
+      sub.height,
       1,
-      bitDepth,
+      bitDepthChroma,
       bypassC,
     );
     applyPlane(
@@ -153,13 +206,20 @@ export function applySao(pic: DecodedPicture, sps: SpsInfo, bitDepth = 8): void 
       pic.cr,
       cw,
       ch,
-      cSize,
-      cSize,
+      cSizeW,
+      cSizeH,
       widthInCtbs,
       heightInCtbs,
       pic.sao,
+      pic.sliceIdByCtb,
+      pic.tileIdByCtb,
+      pic.sliceHeaders,
+      pic.loopFilterAcrossTilesEnabled,
+      pic.log2CtbSize,
+      sub.width,
+      sub.height,
       2,
-      bitDepth,
+      bitDepthChroma,
       bypassC,
     );
   }

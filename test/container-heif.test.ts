@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { getFtypInfo, parseISOBMFF, validateFtyp } from '../src/container/heif';
+import { parseRequiredReferenceTypes } from '../src/container/heic';
 import { isHeic } from '../src/decoder';
 
 function ftyp(majorBrand: string, compatibleBrands: string[] = []): Uint8Array {
@@ -55,5 +56,28 @@ describe('parseISOBMFF', () => {
     const truncatedLargeSize = new Uint8Array(12);
     new DataView(truncatedLargeSize.buffer).setUint32(0, 1);
     expect(parseISOBMFF(truncatedLargeSize)).toEqual([]);
+  });
+});
+
+describe('RequiredReferenceTypesProperty', () => {
+  it('parses the normative 8-bit reference count', () => {
+    expect(
+      parseRequiredReferenceTypes(Uint8Array.from([0, 0, 0, 0, 1, 0x70, 0x72, 0x65, 0x64])),
+    ).toEqual(['pred']);
+  });
+
+  it('accepts the legacy 32-bit count used by the Nokia C044 candidate', () => {
+    expect(
+      parseRequiredReferenceTypes(
+        Uint8Array.from([0, 0, 0, 0, 0, 0, 0, 1, 0x70, 0x72, 0x65, 0x64]),
+      ),
+    ).toEqual(['pred']);
+  });
+
+  it('rejects malformed headers and counts', () => {
+    expect(() => parseRequiredReferenceTypes(Uint8Array.from([0, 0, 0, 1, 0]))).toThrow(
+      'rref full-box header',
+    );
+    expect(() => parseRequiredReferenceTypes(Uint8Array.from([0, 0, 0, 0, 1]))).toThrow('rref');
   });
 });

@@ -9,6 +9,8 @@ export interface ISOBMFFBox {
 }
 
 export interface ItemLocationExtent {
+  /** 1-based `iloc` item-reference index for construction method 2. */
+  extentIndex?: number;
   extentOffset: number;
   extentLength: number;
 }
@@ -35,10 +37,21 @@ export interface ImageSpatialExtent {
 
 export interface PixelInformation {
   bitsPerChannel: number[];
+  channels?: PixelInformationChannel[];
+}
+
+export interface PixelInformationChannel {
+  /** Channel meaning from ISO/IEC 23008-12 Table 13. */
+  channelIdc: number;
+  /** ISO/IEC 23001-17 format: unsigned integer, float, complex, or signed integer. */
+  componentFormat: 0 | 1 | 2 | 3;
+  subsampling?: { type: number; location: number };
+  label?: string;
 }
 
 export interface FileTypeInfo {
   majorBrand: string;
+  minorVersion: number;
   compatibleBrands: string[];
 }
 
@@ -110,9 +123,10 @@ function parseBoxes(buffer: Uint8Array, depth: number, budget: { count: number }
       // their children. If we don't skip it, the version word gets
       // misinterpreted as the size field of a phantom first child,
       // which then masks every real child. `meta` and `iref` are the
-      // FullBoxes in our `containerTypes` list — both need the skip.
-      const isFullBoxContainer = type === 'meta' || type === 'iref';
-      const childrenStart = isFullBoxContainer ? 4 : 0;
+      // FullBoxes in our `containerTypes` list — skip their header before
+      // reading child boxes. `dref` also has a 32-bit entry_count field.
+      const isFullBoxContainer = type === 'meta' || type === 'iref' || type === 'dref';
+      const childrenStart = type === 'dref' ? 8 : isFullBoxContainer ? 4 : 0;
       box.children =
         data.length >= childrenStart
           ? parseBoxes(data.subarray(childrenStart), depth + 1, budget)
@@ -134,6 +148,7 @@ function isContainerBox(type: string): boolean {
     'minf',
     'stbl',
     'dinf',
+    'dref',
     'meta',
     'iprp',
     'ipco',
@@ -214,6 +229,7 @@ export function getFtypInfo(buffer: Uint8Array): FileTypeInfo | null {
 
   return {
     majorBrand: readFourCC(buffer, brandDataStart),
+    minorVersion: view.getUint32(brandDataStart + 4),
     compatibleBrands,
   };
 }
@@ -227,6 +243,7 @@ export function validateFtyp(buffer: Uint8Array): boolean {
  * Parse item location box (iloc)
  */
 export function parseIloc(data: Uint8Array): ItemLocation[] {
+  if (data.length < 6) throw new HeicError('INVALID_CONTAINER', 'heic: truncated iloc header');
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
 
   const version = data[0];
@@ -237,14 +254,46 @@ export function parseIloc(data: Uint8Array): ItemLocation[] {
   const indexSize = version === 1 || version === 2 ? data[5] & 0x0f : 0;
 
   let offset = 6;
+  const readUnsigned = (size: number): number => {
+    if (size === 0) return 0;
+    if (size !== 4 && size !== 8)
+      throw new HeicError('INVALID_CONTAINER', 'heic: invalid iloc field size');
+    if (offset + size > data.length)
+      throw new HeicError('INVALID_CONTAINER', 'heic: truncated iloc field');
+    const value =
+      size === 4
+        ? view.getUint32(offset)
+        : view.getUint32(offset) * 0x100000000 + view.getUint32(offset + 4);
+    offset += size;
+    if (!Number.isSafeInteger(value))
+      throw new HeicError('INVALID_CONTAINER', 'heic: iloc field exceeds safe integer range');
+    return value;
+  };
+  const readUint16 = (): number => {
+    if (offset + 2 > data.length)
+      throw new HeicError('INVALID_CONTAINER', 'heic: truncated iloc field');
+    const value = view.getUint16(offset);
+    offset += 2;
+    return value;
+  };
+  const readUint32 = (): number => {
+    if (offset + 4 > data.length)
+      throw new HeicError('INVALID_CONTAINER', 'heic: truncated iloc field');
+    const value = view.getUint32(offset);
+    offset += 4;
+    return value;
+  };
+
+  for (const fieldSize of [offsetSize, lengthSize, baseOffsetSize, indexSize]) {
+    if (![0, 4, 8].includes(fieldSize))
+      throw new HeicError('INVALID_CONTAINER', 'heic: invalid iloc field size');
+  }
   let itemCount: number;
 
   if (version < 2) {
-    itemCount = view.getUint16(offset);
-    offset += 2;
+    itemCount = readUint16();
   } else {
-    itemCount = view.getUint32(offset);
-    offset += 4;
+    itemCount = readUint32();
   }
 
   const items: ItemLocation[] = [];
@@ -253,60 +302,31 @@ export function parseIloc(data: Uint8Array): ItemLocation[] {
     let itemId: number;
 
     if (version < 2) {
-      itemId = view.getUint16(offset);
-      offset += 2;
+      itemId = readUint16();
     } else {
-      itemId = view.getUint32(offset);
-      offset += 4;
+      itemId = readUint32();
     }
 
     let constructionMethod = 0;
     if (version === 1 || version === 2) {
-      constructionMethod = view.getUint16(offset) & 0x0f;
-      offset += 2;
+      constructionMethod = readUint16() & 0x0f;
     }
 
-    const dataReferenceIndex = view.getUint16(offset);
-    offset += 2;
+    const dataReferenceIndex = readUint16();
 
-    let baseOffset = 0;
-    if (baseOffsetSize === 4) {
-      baseOffset = view.getUint32(offset);
-      offset += 4;
-    } else if (baseOffsetSize === 8) {
-      baseOffset = view.getUint32(offset) * 0x100000000 + view.getUint32(offset + 4);
-      offset += 8;
-    }
+    const baseOffset = readUnsigned(baseOffsetSize);
 
-    const extentCount = view.getUint16(offset);
-    offset += 2;
+    const extentCount = readUint16();
 
-    const extents: Array<{ extentOffset: number; extentLength: number }> = [];
+    const extents: ItemLocationExtent[] = [];
 
     for (let j = 0; j < extentCount; j++) {
-      if (indexSize > 0) {
-        offset += indexSize; // Skip extent index
-      }
-
-      let extentOffset = 0;
-      if (offsetSize === 4) {
-        extentOffset = view.getUint32(offset);
-        offset += 4;
-      } else if (offsetSize === 8) {
-        extentOffset = view.getUint32(offset) * 0x100000000 + view.getUint32(offset + 4);
-        offset += 8;
-      }
-
-      let extentLength = 0;
-      if (lengthSize === 4) {
-        extentLength = view.getUint32(offset);
-        offset += 4;
-      } else if (lengthSize === 8) {
-        extentLength = view.getUint32(offset) * 0x100000000 + view.getUint32(offset + 4);
-        offset += 8;
-      }
-
-      extents.push({ extentOffset, extentLength });
+      const extentIndex = indexSize > 0 ? readUnsigned(indexSize) : undefined;
+      extents.push({
+        extentIndex,
+        extentOffset: readUnsigned(offsetSize),
+        extentLength: readUnsigned(lengthSize),
+      });
     }
 
     items.push({
@@ -429,15 +449,103 @@ export function parseIspe(data: Uint8Array): ImageSpatialExtent {
  * Parse pixel information (pixi)
  */
 export function parsePixi(data: Uint8Array): PixelInformation {
-  // Skip version and flags
-  const numChannels = data[4];
-  const bitsPerChannel: number[] = [];
+  if (data.length < 5)
+    throw new HeicError('INVALID_CONTAINER', 'heic: truncated pixel information property');
+  const version = data[0];
+  const flags = (data[1] << 16) | (data[2] << 8) | data[3];
+  if (version !== 0 || flags & ~1)
+    throw new HeicError(
+      'UNSUPPORTED_FEATURE',
+      'heic: unsupported pixel information version or flags',
+    );
 
+  const numChannels = data[4];
+  if (numChannels === 0 || data.length < 5 + numChannels)
+    throw new HeicError('INVALID_CONTAINER', 'heic: invalid pixel information channel count');
+  const bitsPerChannel: number[] = [];
   for (let i = 0; i < numChannels; i++) {
-    bitsPerChannel.push(data[5 + i]);
+    const depth = data[5 + i];
+    if (depth === 0)
+      throw new HeicError('INVALID_CONTAINER', 'heic: pixel information bit depth is zero');
+    bitsPerChannel.push(depth);
   }
 
-  return { bitsPerChannel };
+  if ((flags & 1) === 0) {
+    if (data.length !== 5 + numChannels)
+      throw new HeicError(
+        'INVALID_CONTAINER',
+        'heic: trailing bytes in pixel information property',
+      );
+    return { bitsPerChannel };
+  }
+
+  let offset = 5 + numChannels;
+  let alphaChannels = 0;
+  const channels: PixelInformationChannel[] = [];
+  const readByte = (): number => {
+    if (offset >= data.length)
+      throw new HeicError(
+        'INVALID_CONTAINER',
+        'heic: truncated pixel information channel metadata',
+      );
+    return data[offset++];
+  };
+  const readLabel = (): string => {
+    const start = offset;
+    while (offset < data.length && data[offset] !== 0) offset++;
+    if (offset >= data.length)
+      throw new HeicError(
+        'INVALID_CONTAINER',
+        'heic: unterminated pixel information channel label',
+      );
+    const bytes = data.subarray(start, offset++);
+    try {
+      return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    } catch {
+      throw new HeicError(
+        'INVALID_CONTAINER',
+        'heic: invalid UTF-8 pixel information channel label',
+      );
+    }
+  };
+
+  for (let i = 0; i < numChannels; i++) {
+    const descriptor = readByte();
+    const channelIdc = descriptor >>> 5;
+    const reserved = (descriptor >>> 4) & 1;
+    const componentFormat = (descriptor >>> 2) & 3;
+    const hasSubsampling = (descriptor & 2) !== 0;
+    const hasLabel = (descriptor & 1) !== 0;
+    if (reserved !== 0)
+      throw new HeicError('INVALID_CONTAINER', 'heic: nonzero pixel information reserved bit');
+    if (channelIdc === 5 && ++alphaChannels > 1)
+      throw new HeicError(
+        'INVALID_CONTAINER',
+        'heic: duplicate alpha channels in pixel information',
+      );
+
+    const channel: PixelInformationChannel = {
+      channelIdc,
+      componentFormat: componentFormat as 0 | 1 | 2 | 3,
+    };
+    if (hasSubsampling) {
+      const subsampling = readByte();
+      const type = subsampling >>> 4;
+      const location = subsampling & 0x0f;
+      if (type > 4 || location > 5)
+        throw new HeicError(
+          'INVALID_CONTAINER',
+          'heic: reserved pixel information subsampling value',
+        );
+      channel.subsampling = { type, location };
+    }
+    if (hasLabel) channel.label = readLabel();
+    channels.push(channel);
+  }
+
+  if (offset !== data.length)
+    throw new HeicError('INVALID_CONTAINER', 'heic: trailing bytes in pixel information property');
+  return { bitsPerChannel, channels };
 }
 
 /**

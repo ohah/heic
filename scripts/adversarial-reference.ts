@@ -15,16 +15,19 @@ import {
 } from '../src';
 import { deblockPicture } from '../src/hevc/deblock';
 import { applySao } from '../src/hevc/sao';
+import { chromaSubsampling } from '../src/hevc/chroma';
 
 const chroma = Number(process.env.HEIC_CHROMA ?? 1);
-if (![0, 1, 3].includes(chroma)) throw Error('Unsupported test chroma');
-const factor = chroma === 3 ? 3 : chroma === 0 ? 1 : 1.5;
+if (![0, 1, 2, 3].includes(chroma)) throw Error('Unsupported test chroma');
+const factor = chroma === 3 ? 3 : chroma === 2 ? 2 : chroma === 0 ? 1 : 1.5;
 const out = '/tmp/heic-adversarial-reference-' + chroma;
 mkdirSync(out, { recursive: true });
 const results = [];
-for (let round = 1; round <= 20; round++) {
+const rounds = Number(process.env.HEIC_ROUNDS ?? 20);
+const depths = (process.env.HEIC_DEPTHS ?? '8,10,12').split(',').map(Number);
+for (let round = 1; round <= rounds; round++) {
   const cases = [];
-  for (const depth of [8, 10, 12]) {
+  for (const depth of depths) {
     const w = round % 2 ? 256 : round * 8 + 66,
       h = round % 2 ? 128 : round * 8 + 58;
     const stem = join(out, `round-${round}-${depth}`);
@@ -42,7 +45,7 @@ for (let round = 1; round <= 20; round++) {
       }
     }
     writeFileSync(stem + '.raw', bytes);
-    const pix = `${chroma === 0 ? 'gray' : chroma === 3 ? 'yuv444p' : 'yuv420p'}${depth === 8 ? '' : `${depth}le`}`;
+    const pix = `${chroma === 0 ? 'gray' : chroma === 3 ? 'yuv444p' : chroma === 2 ? 'yuv422p' : 'yuv420p'}${depth === 8 ? '' : `${depth}le`}`;
     const qp = [0, 7, 19, 32, 45][(round - 1) % 5];
     const params = `keyint=1:${round % 2 ? `crf=${qp}:aq-mode=2` : `qp=${qp}`}:log-level=error:pools=1:frame-threads=1:wpp=${round % 2}:sao=${round % 3 ? 1 : 0}:deblock=${round % 4 ? 1 : 0}:signhide=${round % 2}:scaling-list=default:tskip=1${round > 10 && round % 3 === 0 ? ':lossless=1' : ''}`;
     execFileSync('ffmpeg', [
@@ -105,19 +108,17 @@ for (let round = 1; round <= 20; round++) {
         differences = 0,
         maxDelta = 0;
       for (const [c, plane] of [pic.y, pic.cb, pic.cr].entries()) {
-        const sub = chroma === 1 ? 2 : 1,
-          pw = c ? w / sub : w,
-          ph = c ? h / sub : h,
-          stride = c ? pic.width / sub : pic.width;
+        if (c && chroma === 0) continue;
+        const sub = chromaSubsampling(chroma);
+        const pw = c ? Math.ceil(w / sub.width) : w;
+        const ph = c ? Math.ceil(h / sub.height) : h;
+        const stride = c ? Math.ceil(pic.width / sub.width) : pic.width;
         for (let y = 0; y < ph; y++)
           for (let x = 0; x < pw; x++) {
             const expected = depth === 8 ? ref[k++] : ref.readUInt16LE(k++ * 2);
-            const actual =
-              plane[
-                (y + (c ? sps.cropTop : sps.cropTop * (chroma === 1 ? 2 : 1))) * stride +
-                  x +
-                  (c ? sps.cropLeft : sps.cropLeft * (chroma === 1 ? 2 : 1))
-              ];
+            const cropX = c ? sps.cropLeft : sps.cropLeft * sub.width;
+            const cropY = c ? sps.cropTop : sps.cropTop * sub.height;
+            const actual = plane[(y + cropY) * stride + x + cropX];
             if (actual !== expected) {
               differences++;
               maxDelta = Math.max(maxDelta, Math.abs(actual - expected));

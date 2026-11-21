@@ -78,7 +78,7 @@ jobs:
           assert.equal(pkg.publishConfig.registry, 'https://registry.npmjs.org/');
           assert.equal(Object.keys(pkg.dependencies ?? {}).length, 0);
           for (const file of packed.files) {
-            assert.match(file.path, /^(dist\/|package\.json$|README\.md$|LICENSE$|NOTICE$)/);
+            assert.match(file.path, /^(dist\/|vendor\/|package\.json$|README\.md$|LICENSE$|NOTICE$)/);
           }
           for (const required of ['dist/index.js', 'dist/index.d.ts', 'dist/worker.js', 'LICENSE', 'NOTICE']) {
             assert.ok(packed.files.some(file => file.path === required), `Missing ${required}`);

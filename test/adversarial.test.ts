@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'bun:test';
-import { readFileSync } from 'node:fs';
 import { decode, decodeHeic, parseIpma, parseHvcC, splitLengthPrefixed } from '../src';
-const sample = new Uint8Array(
-  readFileSync(new URL('./fixtures/conformance/pattern-10.heic', import.meta.url)),
-);
+import { buildHeif, codedFixture } from './helpers/heif';
+const sample = buildHeif([codedFixture(10)], 1);
 for (let round = 1; round <= 20; round++)
   describe(`adversarial round ${round}`, () => {
     it('rejects forged association count before iterating beyond bytes', () => {

@@ -1,14 +1,32 @@
-/**
- * YCbCr 4:2:0 to RGBA conversion. iPhone HEICs signal full-range BT.601
- * matrix coefficients in the VUI (matrix_coeffs 6, video_full_range 1);
- * BT.709 and limited range are supported for other encoders.
- */
+/** YCbCr 4:2:0 to RGBA conversion with supported H.273 matrices. */
+
+import type { HeifImageBitDepth } from './bit-depth.js';
+import {
+  decodeBT2020ConstantLuminance,
+  decodeIPTC2,
+  decodeICtCp,
+  decodeSMPTE2085,
+  decodeYCgCo,
+  decodeYCgCoReRo,
+  getYCbCrMatrixCoefficients,
+} from './color-matrix.js';
 
 export interface ColorOptions {
-  bitDepth?: 8 | 10 | 12;
+  bitDepth?: HeifImageBitDepth;
+  /** Chroma sample depth when it differs from luma. Defaults to `bitDepth`. */
+  bitDepthChroma?: HeifImageBitDepth;
 
-  /** VUI matrix_coeffs; 1 = BT.709, 5/6 = BT.601. Defaults to BT.601. */
+  /**
+   * VUI matrix_coeffs; 1 = BT.709, 4 = FCC, 5/6 = BT.601, 7 = SMPTE 240M,
+   * 9 = BT.2020 NCL, 10 = BT.2020 constant luminance, 12/13 = chromaticity-derived
+   * NCL/CL, 14 = BT.2100 ICtCp, and 16/17 = YCgCo-Re/Ro. Unspecified (2) uses BT.601.
+   * Defaults to BT.601.
+   */
   matrixCoeffs?: number;
+  /** H.273 colour_primaries, used by matrix_coeffs 12 and 13. */
+  colorPrimaries?: number;
+  /** VUI transfer_characteristics, used by constant-luminance and ICtCp matrices. */
+  transferCharacteristics?: number;
   fullRange?: boolean;
 }
 
@@ -40,13 +58,33 @@ export function yuv420ToRgba(
     throw new RangeError('heic: YUV planes are smaller than the requested image dimensions');
 
   const bitDepth = options.bitDepth ?? 8;
+  const bitDepthChroma = options.bitDepthChroma ?? bitDepth;
   const factor = 2 ** (bitDepth - 8);
+  const chromaFactor = 2 ** (bitDepthChroma - 8);
   const matrix = options.matrixCoeffs ?? 6;
   const fullRange = options.fullRange ?? true;
-
-  // Kr/Kb per matrix: BT.709 = 0.2126/0.0722, BT.601 = 0.299/0.114.
-  const kr = matrix === 1 ? 0.2126 : matrix === 9 ? 0.2627 : 0.299;
-  const kb = matrix === 1 ? 0.0722 : matrix === 9 ? 0.0593 : 0.114;
+  const coefficients = getYCbCrMatrixCoefficients(matrix, options.colorPrimaries);
+  if (
+    !coefficients &&
+    matrix !== 8 &&
+    matrix !== 10 &&
+    matrix !== 11 &&
+    matrix !== 12 &&
+    matrix !== 13 &&
+    matrix !== 14 &&
+    matrix !== 15 &&
+    matrix !== 16 &&
+    matrix !== 17
+  )
+    throw new RangeError(`heic: unsupported YCbCr matrix ${matrix}`);
+  if ((matrix === 12 || matrix === 13) && !coefficients)
+    throw new RangeError(`heic: matrix_coeffs ${matrix} requires supported colour_primaries`);
+  if (matrix === 8 && bitDepthChroma !== bitDepth && bitDepthChroma !== bitDepth + 1)
+    throw new RangeError('heic: YCgCo requires equal or one-bit-higher chroma depth');
+  if ((matrix === 16 || matrix === 17) && !fullRange && bitDepth - (matrix === 16 ? 2 : 1) < 8)
+    throw new RangeError(`heic: limited-range matrix_coeffs ${matrix} requires BitDepthRGB >= 8`);
+  const { kr, kb } =
+    coefficients ?? (matrix === 10 ? { kr: 0.2627, kb: 0.0593 } : { kr: 0.299, kb: 0.114 });
   const crR = 2 * (1 - kr);
   const cbB = 2 * (1 - kb);
   const crG = (2 * kr * (1 - kr)) / (1 - kr - kb);
@@ -54,7 +92,7 @@ export function yuv420ToRgba(
 
   // Limited range expands 16..235 (luma) / 16..240 (chroma) to 0..255.
   const yScale = fullRange ? 255 / (2 ** bitDepth - 1) : 255 / (219 * factor);
-  const cScale = fullRange ? 255 / (2 ** bitDepth - 1) : 255 / (224 * factor);
+  const cScale = fullRange ? 255 / (2 ** bitDepthChroma - 1) : 255 / (224 * chromaFactor);
   const yOffset = fullRange ? 0 : 16 * factor;
 
   const out = new Uint8Array(pixels * 4);
@@ -65,8 +103,131 @@ export function yuv420ToRgba(
     for (let px = 0; px < width; px++) {
       const lum = (y[yRow + px] - yOffset) * yScale;
       const cIdx = cRow + (px >> 1);
-      const u = (cb[cIdx] - 128 * factor) * cScale;
-      const v = (cr[cIdx] - 128 * factor) * cScale;
+      if (matrix === 8) {
+        const rgb = decodeYCgCo(
+          y[yRow + px],
+          cb[cIdx],
+          cr[cIdx],
+          bitDepth,
+          bitDepthChroma,
+          255,
+          fullRange,
+        );
+        if (!rgb) throw new RangeError('heic: unsupported YCgCo bit-depth combination');
+        out[o] = (rgb[0] + 0.5) | 0;
+        out[o + 1] = (rgb[1] + 0.5) | 0;
+        out[o + 2] = (rgb[2] + 0.5) | 0;
+        out[o + 3] = 255;
+        o += 4;
+        continue;
+      }
+      if (matrix === 16 || matrix === 17) {
+        const rgb = decodeYCgCoReRo(
+          y[yRow + px],
+          cb[cIdx],
+          cr[cIdx],
+          bitDepth,
+          bitDepthChroma,
+          matrix === 16 ? 2 : 1,
+          255,
+          fullRange,
+        );
+        if (!rgb)
+          throw new RangeError(
+            `heic: unsupported bit-depth combination for matrix_coeffs ${matrix}`,
+          );
+        out[o] = (rgb[0] + 0.5) | 0;
+        out[o + 1] = (rgb[1] + 0.5) | 0;
+        out[o + 2] = (rgb[2] + 0.5) | 0;
+        out[o + 3] = 255;
+        o += 4;
+        continue;
+      }
+      if (matrix === 10 || matrix === 13) {
+        const rgb = decodeBT2020ConstantLuminance(
+          y[yRow + px],
+          cb[cIdx],
+          cr[cIdx],
+          bitDepth,
+          bitDepthChroma,
+          options.transferCharacteristics ?? 2,
+          255,
+          fullRange,
+          kr,
+          kb,
+        );
+        if (!rgb)
+          throw new RangeError(
+            `heic: unsupported transfer_characteristics for matrix_coeffs ${matrix} constant luminance`,
+          );
+        out[o] = Math.max(0, Math.min(255, (rgb[0] + 0.5) | 0));
+        out[o + 1] = Math.max(0, Math.min(255, (rgb[1] + 0.5) | 0));
+        out[o + 2] = Math.max(0, Math.min(255, (rgb[2] + 0.5) | 0));
+        out[o + 3] = 255;
+        o += 4;
+        continue;
+      }
+      if (matrix === 14) {
+        const rgb = decodeICtCp(
+          y[yRow + px],
+          cb[cIdx],
+          cr[cIdx],
+          bitDepth,
+          bitDepthChroma,
+          options.transferCharacteristics ?? 2,
+          255,
+          fullRange,
+        );
+        if (!rgb)
+          throw new RangeError(
+            'heic: matrix_coeffs 14 requires PQ or HLG transfer characteristics',
+          );
+        out[o] = Math.max(0, Math.min(255, (rgb[0] + 0.5) | 0));
+        out[o + 1] = Math.max(0, Math.min(255, (rgb[1] + 0.5) | 0));
+        out[o + 2] = Math.max(0, Math.min(255, (rgb[2] + 0.5) | 0));
+        out[o + 3] = 255;
+        o += 4;
+        continue;
+      }
+      if (matrix === 11) {
+        const xyz = decodeSMPTE2085(
+          y[yRow + px],
+          cb[cIdx],
+          cr[cIdx],
+          bitDepth,
+          bitDepthChroma,
+          255,
+          fullRange,
+        );
+        out[o] = Math.max(0, Math.min(255, (xyz[0] + 0.5) | 0));
+        out[o + 1] = Math.max(0, Math.min(255, (xyz[1] + 0.5) | 0));
+        out[o + 2] = Math.max(0, Math.min(255, (xyz[2] + 0.5) | 0));
+        out[o + 3] = 255;
+        o += 4;
+        continue;
+      }
+      if (matrix === 15) {
+        const rgb = decodeIPTC2(
+          y[yRow + px],
+          cb[cIdx],
+          cr[cIdx],
+          bitDepth,
+          bitDepthChroma,
+          options.transferCharacteristics ?? 2,
+          255,
+          fullRange,
+        );
+        if (!rgb)
+          throw new RangeError('heic: matrix_coeffs 15 uses unsupported transfer_characteristics');
+        out[o] = Math.max(0, Math.min(255, (rgb[0] + 0.5) | 0));
+        out[o + 1] = Math.max(0, Math.min(255, (rgb[1] + 0.5) | 0));
+        out[o + 2] = Math.max(0, Math.min(255, (rgb[2] + 0.5) | 0));
+        out[o + 3] = 255;
+        o += 4;
+        continue;
+      }
+      const u = (cb[cIdx] - 128 * chromaFactor) * cScale;
+      const v = (cr[cIdx] - 128 * chromaFactor) * cScale;
 
       const r = lum + crR * v;
       const g = lum - cbG * u - crG * v;

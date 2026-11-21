@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'bun:test';
 import { getScan, SCAN_DIAG, SCAN_HORIZ, SCAN_VERT } from '../src/hevc/scan';
-import { dequantize, DST4, getDctMatrix, inverseTransform } from '../src/hevc/transform';
+import {
+  dequantize,
+  DST4,
+  getDctMatrix,
+  inverseResidualDpcm,
+  inverseTransform,
+  rotateBlock180,
+} from '../src/hevc/transform';
 
 describe('DCT matrix generation', () => {
   it('reproduces the canonical 4x4 matrix', () => {
@@ -119,6 +126,41 @@ describe('inverse transform', () => {
   });
 });
 
+describe('range-extension coefficient rotation', () => {
+  it('rotates both axes of a 4x4 residual block without changing its samples', () => {
+    const block = Int32Array.from({ length: 16 }, (_, i) => i - 8);
+    expect(Array.from(rotateBlock180(block, 4))).toEqual([
+      7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8,
+    ]);
+    expect(Array.from(block)).toEqual(Array.from({ length: 16 }, (_, i) => i - 8));
+  });
+
+  it('rejects a residual buffer whose dimensions do not match the transform block', () => {
+    expect(() => rotateBlock180(new Int32Array(15), 4)).toThrow(RangeError);
+  });
+});
+
+describe('range-extension residual DPCM', () => {
+  it('accumulates each row from left to right without crossing rows', () => {
+    const input = Int32Array.from([1, 2, -1, 3, 4, 5, 6, 7, -2]);
+    expect(Array.from(inverseResidualDpcm(input, 3, 'horizontal'))).toEqual([
+      1, 3, 2, 3, 7, 12, 6, 13, 11,
+    ]);
+    expect(Array.from(input)).toEqual([1, 2, -1, 3, 4, 5, 6, 7, -2]);
+  });
+
+  it('accumulates each column from top to bottom without crossing columns', () => {
+    const input = Int32Array.from([1, 2, 3, 4, -1, 5, 6, -2, 7]);
+    expect(Array.from(inverseResidualDpcm(input, 3, 'vertical'))).toEqual([
+      1, 2, 3, 5, 1, 8, 11, -1, 15,
+    ]);
+  });
+
+  it('rejects a residual buffer whose dimensions do not match the transform block', () => {
+    expect(() => inverseResidualDpcm(new Int32Array(8), 3, 'horizontal')).toThrow(RangeError);
+  });
+});
+
 describe('dequantize', () => {
   it('applies levelScale and the bit-depth shift', () => {
     const levels = new Int32Array(64);
@@ -138,6 +180,38 @@ describe('dequantize', () => {
     const scaled = dequantize(levels, 4, 20, 8, factors);
     expect(scaled[0]).toBe(flat[0]);
     expect(scaled[5]).toBeGreaterThan(flat[5] * 2 - 2);
+  });
+
+  it('uses scaling lists for 4x4 transform skip but not larger skipped blocks', () => {
+    const levels4 = new Int32Array(16).fill(5);
+    const factors4 = new Int32Array(16).fill(32);
+    expect(dequantize(levels4, 4, 20, 8, factors4, true)).toEqual(
+      dequantize(levels4, 4, 20, 8, factors4),
+    );
+
+    const levels8 = new Int32Array(64).fill(5);
+    const factors8 = new Int32Array(64).fill(32);
+    expect(dequantize(levels8, 8, 20, 8, factors8, true)).toEqual(
+      dequantize(levels8, 8, 20, 8, null),
+    );
+  });
+
+  it('uses the extended 12-bit transform range and QP scaling', () => {
+    const levels = new Int32Array(16);
+    levels[0] = 1;
+    expect(dequantize(levels, 4, 75, 12, null)[0]).toBe(7_296);
+    expect(dequantize(levels, 4, 75, 12, null, false, true)[0]).toBe(58_368);
+
+    levels[0] = 100;
+    expect(dequantize(levels, 4, 75, 12, null)[0]).toBe(32_767);
+    expect(dequantize(levels, 4, 75, 12, null, false, true)[0]).toBe(262_143);
+  });
+
+  it('keeps extended-range intermediate inverse-transform values', () => {
+    const coeffs = new Int32Array(16);
+    coeffs[0] = 262_143;
+    expect(inverseTransform(coeffs, 4, 12, false)[0]).toBe(8_192);
+    expect(inverseTransform(coeffs, 4, 12, false, true)[0]).toBe(4_096);
   });
 });
 

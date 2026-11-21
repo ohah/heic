@@ -21,6 +21,8 @@ export enum NalType {
 
 export interface NalUnit {
   type: NalType;
+  /** `nuh_layer_id` from the HEVC NAL unit header. */
+  layerId: number;
   /** Full NAL payload including the 2-byte header. */
   data: Uint8Array;
 }
@@ -32,11 +34,23 @@ export function isSliceNal(type: number): boolean {
 
 /**
  * Split a length-prefixed HEVC item payload (as stored in HEIF `mdat`,
- * prefix size from `hvcC.nalLengthSize`) into NAL units.
+ * prefix size from `hvcC.nalLengthSize`) into NAL units. When an HEIF `hvc1`
+ * item requests the default H.265 decoder layer set, higher-layer NAL units
+ * are omitted and layer 0 is retained.
  */
-export function splitLengthPrefixed(payload: Uint8Array, nalLengthSize: number): NalUnit[] {
+export function splitLengthPrefixed(
+  payload: Uint8Array,
+  nalLengthSize: number,
+  baseLayerOnly = false,
+  includedLayerIds?: readonly number[],
+): NalUnit[] {
   if (!Number.isInteger(nalLengthSize) || nalLengthSize < 1 || nalLengthSize > 4)
     throw new HeicError('INVALID_BITSTREAM', 'heic: invalid NAL length prefix size');
+  if (
+    includedLayerIds?.some((layerId) => !Number.isInteger(layerId) || layerId < 0 || layerId > 63)
+  )
+    throw new HeicError('INVALID_OPTIONS', 'heic: invalid HEVC layer id selection');
+  const includedLayers = includedLayerIds ? new Set(includedLayerIds) : null;
   const nals: NalUnit[] = [];
   let p = 0;
   while (p + nalLengthSize <= payload.length) {
@@ -48,12 +62,21 @@ export function splitLengthPrefixed(payload: Uint8Array, nalLengthSize: number):
     const data = payload.subarray(p, p + len);
     if (data[0] & 128 || !(data[1] & 7))
       throw new HeicError('INVALID_BITSTREAM', 'heic: invalid NAL header');
-    if (data[0] & 1 || data[1] >> 3)
+    const layerId = ((data[0] & 1) << 5) | (data[1] >> 3);
+    if (layerId !== 0 && baseLayerOnly) {
+      p += len;
+      continue;
+    }
+    if (includedLayers && !includedLayers.has(layerId)) {
+      p += len;
+      continue;
+    }
+    if (layerId !== 0 && !includedLayers)
       throw new HeicError(
         'UNSUPPORTED_FEATURE',
         'heic: multilayer HEVC NAL units are not supported',
       );
-    nals.push({ type: (data[0] >> 1) & 0x3f, data });
+    nals.push({ type: (data[0] >> 1) & 0x3f, layerId, data });
     p += len;
   }
   if (p !== payload.length)
@@ -82,7 +105,12 @@ export function splitAnnexB(stream: Uint8Array): NalUnit[] {
     while (end > current.payload && stream[end - 1] === 0) end--;
 
     const data = stream.subarray(current.payload, end);
-    if (data.length >= 2) nals.push({ type: (data[0] >> 1) & 0x3f, data });
+    if (data.length >= 2)
+      nals.push({
+        type: (data[0] >> 1) & 0x3f,
+        layerId: ((data[0] & 1) << 5) | (data[1] >> 3),
+        data,
+      });
     current = next;
   }
 
@@ -143,7 +171,8 @@ export class BitReader {
   /** se(v): signed Exp-Golomb. */
   se(): number {
     const k = this.ue();
-    return k & 1 ? (k + 1) >> 1 : -(k >> 1);
+    const value = k & 1 ? (k + 1) >> 1 : -(k >> 1);
+    return value === 0 ? 0 : value;
   }
 
   get bitPosition(): number {

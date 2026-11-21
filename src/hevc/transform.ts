@@ -60,13 +60,48 @@ export const DST4 = new Int32Array([
   29, 55, 74, 84, 74, 74, 0, -74, 84, -29, -74, 55, 55, -84, 74, -29,
 ]);
 
-function clip16(v: number): number {
-  return v < -32768 ? -32768 : v > 32767 ? 32767 : v;
+function clipCoeff(v: number, log2TransformRange: number): number {
+  const min = -(2 ** log2TransformRange);
+  const max = 2 ** log2TransformRange - 1;
+  return v < min ? min : v > max ? max : v;
+}
+
+/** Reverse both axes of a residual block (the 180-degree REXT rotation). */
+export function rotateBlock180(block: Int32Array, size: number): Int32Array {
+  if (!Number.isInteger(size) || size <= 0 || block.length !== size * size)
+    throw new RangeError('HEVC residual block size does not match its samples');
+  const rotated = new Int32Array(block.length);
+  for (let i = 0; i < block.length; i++) rotated[i] = block[block.length - 1 - i];
+  return rotated;
+}
+
+/** Apply the cumulative horizontal or vertical residual DPCM process (8.6.5). */
+export function inverseResidualDpcm(
+  residual: Int32Array,
+  size: number,
+  direction: 'horizontal' | 'vertical',
+): Int32Array {
+  if (!Number.isInteger(size) || size <= 0 || residual.length !== size * size)
+    throw new RangeError('HEVC residual block size does not match its samples');
+  const out = residual.slice();
+  if (direction === 'horizontal') {
+    for (let y = 0; y < size; y++) {
+      const row = y * size;
+      for (let x = 1; x < size; x++) out[row + x] += out[row + x - 1];
+    }
+  } else {
+    for (let y = 1; y < size; y++) {
+      const row = y * size;
+      const previousRow = row - size;
+      for (let x = 0; x < size; x++) out[row + x] += out[previousRow + x];
+    }
+  }
+  return out;
 }
 
 /**
- * One inverse-transform pass: out = in^T x T, with rounding shift and 16-bit
- * clip. Applying it twice yields T^T x C x T (8.6.4.2).
+ * One inverse-transform pass: out = in^T x T, with rounding shift and the
+ * bitstream's coefficient-range clip. Applying it twice yields T^T x C x T.
  */
 function inversePass(
   matrix: Int32Array,
@@ -74,13 +109,14 @@ function inversePass(
   output: Int32Array,
   size: number,
   shift: number,
+  log2TransformRange: number,
 ): void {
   const add = 1 << (shift - 1);
   for (let j = 0; j < size; j++) {
     for (let n = 0; n < size; n++) {
       let sum = 0;
       for (let k = 0; k < size; k++) sum += matrix[k * size + n] * input[k * size + j];
-      output[j * size + n] = clip16((sum + add) >> shift);
+      output[j * size + n] = clipCoeff((sum + add) >> shift, log2TransformRange);
     }
   }
 }
@@ -95,12 +131,17 @@ export function inverseTransform(
   size: number,
   bitDepth: number,
   useDst: boolean,
+  extendedPrecision = false,
 ): Int32Array {
   const matrix = useDst ? DST4 : getDctMatrix(size);
+  const log2TransformRange = extendedPrecision ? Math.max(15, bitDepth + 6) : 15;
   const tmp = new Int32Array(size * size);
   const out = new Int32Array(size * size);
-  inversePass(matrix, coeffs, tmp, size, 7);
-  inversePass(matrix, tmp, out, size, 20 - bitDepth);
+  inversePass(matrix, coeffs, tmp, size, 7, log2TransformRange);
+  // H.265 8.6.4's second inverse-transform shift depends on the permitted
+  // coefficient range. For the default 15-bit range this reduces to
+  // 20 - bitDepth; extended precision increases it with log2TransformRange.
+  inversePass(matrix, tmp, out, size, 5 + log2TransformRange - bitDepth, log2TransformRange);
   return out;
 }
 
@@ -109,7 +150,8 @@ const LEVEL_SCALE = [40, 45, 51, 57, 64, 72];
 /**
  * Dequantize a coefficient block (8.6.3). `scalingFactors` is the m[x][y]
  * matrix (16s when scaling lists are disabled). Uses float64 arithmetic to
- * dodge 32-bit overflow; exact for all conformant magnitudes.
+ * dodge 32-bit overflow; exact for all conformant magnitudes. H.265 uses
+ * scaling lists for skipped 4x4 blocks, but fixed 16s for larger skipped blocks.
  */
 export function dequantize(
   levels: Int32Array,
@@ -117,9 +159,12 @@ export function dequantize(
   qp: number,
   bitDepth: number,
   scalingFactors: Int32Array | null,
+  transformSkipped = false,
+  extendedPrecision = false,
 ): Int32Array {
   const log2Size = 31 - Math.clz32(size);
-  const bdShift = bitDepth + log2Size - 5;
+  const log2TransformRange = extendedPrecision ? Math.max(15, bitDepth + 6) : 15;
+  const bdShift = bitDepth + log2Size + 10 - log2TransformRange;
   const add = 1 << (bdShift - 1);
   const scale = LEVEL_SCALE[qp % 6] * 2 ** Math.floor(qp / 6);
   const out = new Int32Array(size * size);
@@ -127,8 +172,8 @@ export function dequantize(
   for (let i = 0; i < size * size; i++) {
     const level = levels[i];
     if (level === 0) continue;
-    const m = scalingFactors ? scalingFactors[i] : 16;
-    out[i] = clip16(Math.floor((level * m * scale + add) / div));
+    const m = scalingFactors && !(transformSkipped && size > 4) ? scalingFactors[i] : 16;
+    out[i] = clipCoeff(Math.floor((level * m * scale + add) / div), log2TransformRange);
   }
   return out;
 }

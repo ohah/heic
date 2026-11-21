@@ -8,6 +8,8 @@
 export const SCAN_DIAG = 0;
 export const SCAN_HORIZ = 1;
 export const SCAN_VERT = 2;
+/** Alternating horizontal rows used by HEVC SCC palette index syntax. */
+export const SCAN_TRAV = 3;
 
 /** Up-right diagonal scan order (6.5.3). */
 function diagScan(size: number): Int32Array {
@@ -42,6 +44,19 @@ function vertScan(size: number): Int32Array {
   return out;
 }
 
+function traverseScan(size: number): Int32Array {
+  const out = new Int32Array(size * size);
+  let i = 0;
+  for (let y = 0; y < size; y++) {
+    if ((y & 1) === 0) {
+      for (let x = 0; x < size; x++) out[i++] = y * size + x;
+    } else {
+      for (let x = size - 1; x >= 0; x--) out[i++] = y * size + x;
+    }
+  }
+  return out;
+}
+
 /** scanOrder[scanIdx][log2Size] -> raster positions by scan position. */
 const cache = new Map<number, Int32Array>();
 
@@ -54,7 +69,9 @@ export function getScan(scanIdx: number, size: number): Int32Array {
       ? horizScan(size)
       : scanIdx === SCAN_VERT
         ? vertScan(size)
-        : diagScan(size);
+        : scanIdx === SCAN_TRAV
+          ? traverseScan(size)
+          : diagScan(size);
   cache.set(key, scan);
   return scan;
 }

@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'bun:test';
-import { NalType, splitAnnexB } from '../src/hevc/nal';
+import { BitReader, NalType, splitAnnexB } from '../src/hevc/nal';
+
+describe('BitReader signed Exp-Golomb values', () => {
+  it('represents se(0) as positive zero', () => {
+    const reader = new BitReader(new Uint8Array([0b10100110]));
+
+    expect(reader.se()).toBe(0);
+    expect(Object.is(reader.se(), -0)).toBe(false);
+    expect(reader.se()).toBe(-1);
+  });
+});
 
 describe('splitAnnexB', () => {
   it('splits mixed three-byte and four-byte start codes', () => {
