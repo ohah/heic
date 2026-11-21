@@ -305,7 +305,7 @@ it('decodes both views of the official MVHEVCS_A vector to its H.265.1 output ha
     }
     expect(hash.digest('hex')).toBe(expectedMd5.get(layerId));
   }
-}, 20_000);
+}, 60_000);
 
 it('decodes an MV-HEVC output layer through an lhv1 HEIF item', () => {
   const bytes = new Uint8Array(

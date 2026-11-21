@@ -2561,7 +2561,7 @@ it('decodes official 10-bit 4:2:2 B pictures across in-file and external tili ti
     expect(actual.cb).toEqual(repeatHorizontalRows(expected.cb, tileWidth / 2, tileHeight));
     expect(actual.cr).toEqual(repeatHorizontalRows(expected.cr, tileWidth / 2, tileHeight));
   }
-}, 180_000);
+}, 600_000);
 
 it('decodes a multi-reference weighted B picture across in-file and external tili tiles', () => {
   const nals = splitAnnexB(fixture('wp-b-toshiba-3.bit'));

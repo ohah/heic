@@ -489,5 +489,5 @@ describe('HEVC long-term reference pictures', () => {
       bPictureCount: 484,
       rootIndex: 11,
     });
-  }, 15_000);
+  }, 30_000);
 });

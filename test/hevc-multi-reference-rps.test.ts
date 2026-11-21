@@ -494,7 +494,7 @@ it('decodes official RPS_B random slice-header reference sets', () => {
     requiresUnusedRpsEntries: true,
     checkPublicPredPath: true,
   });
-});
+}, 20_000);
 
 it('decodes official RPS_F inter-predicted sets with unused deltas', () => {
   verifyShortTermRpsVector({

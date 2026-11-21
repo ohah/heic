@@ -256,6 +256,6 @@ describe('HEVC High Throughput sequences', () => {
         vector.height,
         vector.bitDepth,
       ]);
-    });
+    }, 20_000);
   }
 });

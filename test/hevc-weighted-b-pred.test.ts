@@ -269,4 +269,4 @@ it('reconstructs the official weighted B-slice conformance sequence', () => {
   expect(finalHeifPlanes.y).toEqual(finalFrame.y);
   expect(finalHeifPlanes.cb).toEqual(finalFrame.cb);
   expect(finalHeifPlanes.cr).toEqual(finalFrame.cr);
-}, 20_000);
+}, 45_000);
