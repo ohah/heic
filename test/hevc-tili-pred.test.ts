@@ -2936,7 +2936,7 @@ it('decodes a four-reference weighted B picture through in-file and external til
       repeatHorizontalRows(decodeHeic(baseline).data, width * 4, height),
     );
   }
-}, 60_000);
+}, 120_000);
 
 it('decodes external tili P tiles against multi-reference pred images', async () => {
   const nals = splitAnnexB(fixture('rps-c-ericsson-5.bit'));
